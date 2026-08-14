@@ -157,7 +157,8 @@
         // ⚠️ ВАЖНО: ЗАМЕНИТЕ ЭТОТ АДРЕС НА ВАШ СЕРВЕР ОТ RENDER!
         // Если ваш Render называется crocodile-backend, оставьте как есть.
         // =========================================================
-        window.const socket = new WebSocket("wss://crocodile-backend.onrender.com/ws");
+        const socket = new WebSocket("wss://crocodile-backend.onrender.com/ws");
+window.socket = socket; // <-- Добавьте только эту строчку
         const menuScreen = document.getElementById('menu-screen');
         const gameScreen = document.getElementById('game-screen');
         const categoryPopup = document.getElementById('category-popup');
