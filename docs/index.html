@@ -292,7 +292,49 @@
                 addSystemMessage(`☠️ Ошибка: ${data.message}`);
             }
         };
+        // Обработчики нажатий с защитой от ошибки "Still in CONNECTING"
+        function sendGameAction(action, data = {}) {
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ action: action, ...data }));
+            } else {
+                console.warn("Соединение ещё не установлено. Повторите попытку через секунду.");
+                // Дадим пользователю визуальную подсказку
+                addSystemMessage("⏳ Соединение с сервером устанавливается, подождите 5-10 секунд...");
+            }
+        }
 
+        menuStartBtn.onclick = function() {
+            showCategoryPicker((cat) => sendGameAction("start_game", { category: cat }));
+        };
+        menuLeadBtn.onclick = function() {
+            showCategoryPicker((cat) => sendGameAction("take_lead", { category: cat }));
+        };
+        restartBtn.onclick = function() { sendGameAction("restart_game"); };
+        skipBtn.onclick = function() { sendGameAction("skip_word"); };
+        timerToggleBtn.onclick = function() { sendGameAction("toggle_timer"); };
+        devBtn.onclick = function() { sendGameAction("dev_win"); };
+        emojiToggle.onclick = function() { emojiContainer.classList.toggle('active'); };
+        
+        emojis.forEach(e => {
+            const btn = document.createElement('span');
+            btn.innerText = e; btn.classList.add('emoji-btn');
+            btn.onclick = () => {
+                sendGameAction("guess", { word: e });
+                addMessage(`Я: ${e}`, 'self', null);
+                emojiContainer.classList.remove('active');
+            };
+            emojiContainer.appendChild(btn);
+        });
+
+        sendBtn.onclick = () => {
+            const text = input.value.trim();
+            if (text) {
+                sendGameAction("guess", { word: text });
+                addMessage(`Я: ${text}`, 'self', null);
+                input.value = "";
+            }
+        };
+        input.addEventListener("keypress", (e) => { if (e.key === "Enter") sendBtn.click(); });
         function addMessage(text, type = "other", avatar = null, name = null) {
             const wrapper = document.createElement('div');
             wrapper.classList.add('message-wrapper', type);
