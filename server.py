@@ -19,7 +19,7 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/img", StaticFiles(directory="static/img"), name="img")
-app.mount("/sounds", StaticFiles(directory="static/sounds"), name="sounds")
+# app.mount("/sounds", StaticFiles(directory="static/sounds"), name="sounds")
 
 @app.get("/")
 async def get_index():
