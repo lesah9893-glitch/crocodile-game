@@ -234,5 +234,9 @@
             border: none;
             cursor: pointer;
             transition: 0.2s;
+            
+        #category-popup {
+    background: #0b0d17 !important; /* Заставляет окно быть видимым */
+    backdrop-filter: none !important;
         }
         #send-btn:hover { transform: scale(1.05); }

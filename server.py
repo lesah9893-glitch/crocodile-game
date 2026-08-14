@@ -8,7 +8,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# Разрешаем кросс-доменные запросы (нужно для ВК)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,7 +16,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Папка должна называться docs для GitHub Pages
 app.mount("/static", StaticFiles(directory="docs"), name="static")
 app.mount("/img", StaticFiles(directory="docs/img"), name="img")
 
@@ -298,9 +296,3 @@ async def websocket_endpoint(websocket: WebSocket):
             room.is_active = False
             if room.timer_task: room.timer_task.cancel()
             await room.broadcast({"type": "system", "message": "Ведущий вышел. Игра приостановлена."})
-
-# Для локального запуска (Render использует команду uvicorn)
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
