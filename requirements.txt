@@ -1,3 +1,8 @@
+<<<<<<< HEAD
 fastapi
 uvicorn
+=======
+fastapi
+uvicorn
+>>>>>>> b7483986408c70435428205c15e3158d0f3d0527
 websockets
