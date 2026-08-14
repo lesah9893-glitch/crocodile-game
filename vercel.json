@@ -3,7 +3,7 @@
   "outputDirectory": "docs",
   "headers": [
     {
-      "source": "/:path*",
+      "source": "/(.*)",
       "headers": [
         {
           "key": "X-Test-Vercel",
