@@ -186,7 +186,9 @@
         const devBtn = document.getElementById('dev-btn');
 
         let myId = null, myEmoji = null;
-
+        
+        const emojis = ['🐊', '💀', '🍕', '🎉', '👑', '⚓', '😄', '😂']; // Пидоры
+        
         // Звуки отключены, чтобы не было 404 ошибок, 
         // но если захотите - просто раскомментируйте и добавьте файлы в папку img
 
@@ -368,9 +370,9 @@
             if (messagesDiv.children.length > 200) messagesDiv.removeChild(messagesDiv.firstChild);
         }
         function addSystemMessage(text) { addMessage(text, 'system', null); }
-
+            
         emojiToggle.onclick = function() { emojiContainer.classList.toggle('active'); };
-        const emojis = ['🐊', '💀', '🍕', '🎉', '👑', '⚓', '😄', '😂'];
+        
         emojis.forEach(e => {
             const btn = document.createElement('span');
             btn.innerText = e; btn.classList.add('emoji-btn');
