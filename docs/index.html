@@ -157,8 +157,7 @@
         // ⚠️ ВАЖНО: ЗАМЕНИТЕ ЭТОТ АДРЕС НА ВАШ СЕРВЕР ОТ RENDER!
         // Если ваш Render называется crocodile-backend, оставьте как есть.
         // =========================================================
-        const socket = new WebSocket("wss://crocodile-backend.onrender.com/ws");
-
+        window.const socket = new WebSocket("wss://crocodile-backend.onrender.com/ws");
         const menuScreen = document.getElementById('menu-screen');
         const gameScreen = document.getElementById('game-screen');
         const categoryPopup = document.getElementById('category-popup');
@@ -375,6 +374,21 @@
             }
         };
         input.addEventListener("keypress", (e) => { if (e.key === "Enter") sendBtn.click(); });
+        // Кнопка диагностики (появляется в углу, если игра тормозит)
+const diagBtn = document.createElement('button');
+diagBtn.innerText = 'Статус WS';
+diagBtn.style.cssText = 'position:fixed; bottom:100px; right:10px; z-index:999; background:#333; color:#fff; padding:5px 10px; border-radius:5px; font-size:12px;';
+diagBtn.onclick = () => {
+    const status = window.socket ? window.socket.readyState : 'Нет сокета';
+    const statusText = {
+        0: '🔴 Подключается (0)',
+        1: '🟢 Открыт (1)',
+        2: '🟡 Закрывается (2)',
+        3: '🔴 Закрыт (3)'
+    }[status] || 'Неизвестно';
+    alert(`Статус WebSocket: ${statusText}\nЕсли горит 🔴, перезагрузите страницу через 30 секунд!`);
+};
+document.body.appendChild(diagBtn);
     </script>
 </body>
 </html>
