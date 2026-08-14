@@ -1,14 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "outputDirectory": "docs",
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        {
-          "key": "X-Test-Vercel",
-          "value": "works"
-        },
         {
           "key": "Content-Security-Policy",
           "value": "frame-ancestors 'self' https://vk.com https://vk.ru;"
