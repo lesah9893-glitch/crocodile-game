@@ -158,7 +158,7 @@
         // Если ваш Render называется crocodile-backend, оставьте как есть.
         // =========================================================
         const socket = new WebSocket("wss://crocodile-game.onrender.com/ws");
-window.socket = socket; // <-- Добавьте только эту строчку
+    window.socket = socket; // <-- Добавьте только эту строчку
         const menuScreen = document.getElementById('menu-screen');
         const gameScreen = document.getElementById('game-screen');
         const categoryPopup = document.getElementById('category-popup');
@@ -294,12 +294,27 @@ window.socket = socket; // <-- Добавьте только эту строчк
         };
         // Обработчики нажатий с защитой от ошибки "Still in CONNECTING"
         function sendGameAction(action, data = {}) {
+            // Если соединение открыто - шлём сразу
             if (socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify({ action: action, ...data }));
-            } else {
-                console.warn("Соединение ещё не установлено. Повторите попытку через секунду.");
-                // Дадим пользователю визуальную подсказку
-                addSystemMessage("⏳ Соединение с сервером устанавливается, подождите 5-10 секунд...");
+                return;
+            }
+            // Если соединение закрыто - сообщаем о перезагрузке
+            if (socket.readyState === WebSocket.CLOSED || socket.readyState === WebSocket.CLOSING) {
+                addSystemMessage("⚠️ Соединение разорвано. Перезагрузите страницу (Ctrl+F5).");
+                return;
+            }
+            // Если всё ещё подключается - даём серверу время проснуться
+            if (socket.readyState === WebSocket.CONNECTING) {
+                addSystemMessage("⏳ Сервер просыпается. Подождите 15 секунд и попробуйте снова...");
+                // Через 15 секунд пробуем отправить ещё раз
+                setTimeout(() => {
+                    if (socket.readyState === WebSocket.OPEN) {
+                        socket.send(JSON.stringify({ action: action, ...data }));
+                    } else {
+                        addSystemMessage("⏳ Сервер всё ещё загружается. Попробуйте через минуту.");
+                    }
+                }, 15000);
             }
         }
 
