@@ -916,15 +916,37 @@ categoryChip.style.display='none';
 
 function updateScoreboard(players){
 latestPlayers=players||[];
+
+/* Если ведущий сменил имя — обновляем его имя в состоянии */
+if(currentLeaderId){
+const leader=latestPlayers.find(p=>p.id===currentLeaderId);
+if(leader){
+currentLeaderName=leader.name;
+}
+}
+
 scoreboard.innerHTML='';
-[...latestPlayers].sort((a,b)=>b.score-a.score).forEach(p=>{
+
+[...latestPlayers]
+.sort((a,b)=>b.score-a.score)
+.forEach(p=>{
 const el=document.createElement('div');
-el.className='player-score'+(p.id===currentLeaderId?' leader':'');
+
+el.className=
+'player-score'+
+(p.id===currentLeaderId?' leader':'');
+
 el.textContent=`${p.name} · ${p.score}`;
-if(p.id===myId)el.style.borderColor='rgba(255,255,255,.55)';
+
+if(p.id===myId){
+el.style.borderColor='rgba(255,255,255,.55)';
+}
+
 scoreboard.appendChild(el);
 });
-updateBroadcastStatus();
+
+/* Перерисовываем ON AIR и нижний статус */
+updateOnAir();
 }
 
 function addMessage(text,type='other',avatar=null,name=null,messageId=null,proximity=null){
