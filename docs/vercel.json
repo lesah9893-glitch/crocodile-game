@@ -10,7 +10,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "frame-ancestors 'self' https://vk.com https://vk.ru;"
+          "value": "frame-ancestors 'self' https://vk.com https://*.vk.com https://vk.ru https://*.vk.ru;"
         }
       ]
     }
