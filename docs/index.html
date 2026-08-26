@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>РАДИО МОРЕ — Крокодил</title>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
+<link rel="icon" type="image/png" href="./img/logo.png">
+<script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
 <script src="./vk-bridge.min.js"></script>
 <script>
 if(window.vkBridge){
@@ -113,7 +114,7 @@ min-height:0;
 overflow:hidden;
 background:
 linear-gradient(180deg,rgba(1,10,19,.48),rgba(1,8,15,.76)),
-url('img/game_bg.png') center/cover no-repeat,
+url('img/bg_game.png') center/cover no-repeat,
 url('img/bg_new.png') center/cover no-repeat;
 }
 #topbar{
@@ -685,6 +686,1286 @@ transition:.22s;
 #secret-card{min-height:52px}
 #broadcast-status{display:none}
 }
+
+#menu-connection{margin:10px auto 14px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:42px;padding:8px 12px;border:1px solid rgba(0,161,217,.22);border-radius:14px;background:rgba(1,15,27,.72);font-size:11px;font-weight:850;color:#bfe8f6}
+.status-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;animation:statusPulse 1s infinite alternate}
+.status-dot.red{background:#ff506c;box-shadow:0 0 12px rgba(255,80,108,.85)}
+.status-dot.yellow{background:#ffc844;box-shadow:0 0 12px rgba(255,200,68,.78)}
+.status-dot.green{background:#20e4bd;box-shadow:0 0 12px rgba(32,228,189,.8);animation:none}
+@keyframes statusPulse{from{opacity:.38}to{opacity:1}}
+#menu-admin-btn{width:100%;height:40px;margin-top:4px;border-radius:13px;border:1px solid rgba(0,161,217,.23);background:rgba(5,34,56,.7);font-size:11px;font-weight:900;letter-spacing:.08em;cursor:pointer}
+#spectator-banner{display:none;flex:0 0 auto;padding:7px 12px;text-align:center;background:rgba(255,200,68,.1);border-bottom:1px solid rgba(255,200,68,.3);color:#ffe6a0;font-size:11px;font-weight:800}
+.player-score.spectator{opacity:.65;border-style:dashed}
+#admin-btn,#vote-btn{white-space:nowrap}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.admin-grid>*{min-width:0}
+.admin-field{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.admin-field label{font-size:10px;color:#80b1c7;font-weight:800;letter-spacing:.05em}
+.admin-input,.admin-select{width:100%;height:40px;border-radius:12px;border:1px solid rgba(0,161,217,.28);background:rgba(1,14,25,.88);color:#fff;padding:0 11px;outline:none}
+.admin-action{width:100%;min-height:40px;border:1px solid rgba(0,161,217,.25);border-radius:12px;background:rgba(7,42,68,.75);font-weight:850;cursor:pointer}
+.admin-action.primary{background:linear-gradient(135deg,var(--cyan),var(--blue));border:0}
+.admin-action.danger{background:rgba(111,18,37,.72);border-color:rgba(255,80,108,.4)}
+#admin-login-error{min-height:18px;margin-top:7px;color:#ff9daf;font-size:11px;text-align:center}
+#admin-session-note{font-size:10px;color:#79a4b8;text-align:center;margin:4px 0 12px}
+#vote-start-list{display:flex;flex-direction:column;gap:7px}
+.vote-player{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid rgba(0,161,217,.14);border-radius:12px;background:rgba(5,35,57,.7)}
+.vote-player span{flex:1;font-size:12px}
+.vote-player button{height:32px;border-radius:9px;border:1px solid rgba(255,80,108,.34);background:rgba(90,14,32,.65);font-size:10px;font-weight:850;cursor:pointer}
+#kick-vote-box{display:none;position:absolute;left:50%;top:72px;transform:translateX(-50%);z-index:115;width:min(92%,440px);padding:13px;border-radius:18px;border:1px solid rgba(255,200,68,.38);background:rgba(28,25,12,.96);box-shadow:0 18px 50px rgba(0,0,0,.5)}
+#kick-vote-title{font-size:12px;font-weight:900;color:#ffe49a}
+#kick-vote-meta{font-size:10px;color:#c8b878;margin:4px 0 9px}
+#kick-vote-actions{display:flex;gap:7px}
+#kick-vote-actions button{flex:1;height:36px;border-radius:11px;border:1px solid rgba(255,255,255,.12);font-weight:900;cursor:pointer}
+#vote-yes{background:rgba(18,102,77,.78)}
+#vote-no{background:rgba(91,27,40,.78)}
+.spectator-lock{opacity:.55;pointer-events:none}
+#admin-toast{display:none;margin-top:8px;padding:7px 9px;border-radius:10px;background:rgba(32,228,189,.1);border:1px solid rgba(32,228,189,.25);color:#a8ffe9;font-size:10px;text-align:center}
+@media(max-width:650px){#menu-connection{font-size:10px;min-height:38px}#kick-vote-box{top:58px}.admin-grid{grid-template-columns:1fr}#spectator-banner{font-size:10px;padding:6px 8px}}
+
+
+/* ===== RADIO MORE UI STYLE PASS ===== */
+:root{
+--gold:#ffc83d;
+--gold2:#ff9f1a;
+--gold-soft:rgba(255,200,61,.16);
+--red:#ff4d61;
+--green:#20df9f;
+}
+button{transition:transform .14s ease,filter .14s ease,box-shadow .14s ease,border-color .14s ease}
+button:active{transform:scale(.97)}
+#menu-card{
+border-color:rgba(0,193,255,.5);
+box-shadow:0 28px 90px rgba(0,0,0,.68),0 0 38px rgba(0,161,217,.15);
+}
+#menu-connection{
+min-height:54px;
+justify-content:flex-start;
+padding:10px 14px;
+border-radius:15px;
+background:linear-gradient(135deg,rgba(4,29,48,.92),rgba(1,15,27,.92));
+}
+.status-dot{width:11px!important;height:11px!important;flex:0 0 11px;border-radius:50%;animation:statusPulse .9s infinite alternate}
+.status-dot.red{background:#ff4052;box-shadow:0 0 15px rgba(255,64,82,.9)}
+.status-dot.yellow{background:#ffc32b;box-shadow:0 0 15px rgba(255,195,43,.85)}
+.status-dot.green{background:#20df9f;box-shadow:0 0 15px rgba(32,223,159,.9)}
+@keyframes statusPulse{from{opacity:.55;transform:scale(.9)}to{opacity:1;transform:scale(1.08)}}
+#menu-admin-btn,#admin-btn,#mobile-admin{
+color:#ffd65d!important;
+border-color:rgba(255,200,61,.68)!important;
+background:linear-gradient(135deg,rgba(91,61,5,.34),rgba(18,26,37,.88))!important;
+box-shadow:inset 0 0 18px rgba(255,200,61,.05),0 0 15px rgba(255,200,61,.06);
+}
+#menu-admin-btn:hover,#admin-btn:hover{box-shadow:0 0 22px rgba(255,200,61,.22)}
+#menu-top-btn,#top-btn,#mobile-top{color:#5edcff}
+.admin-action.primary,#admin-login-submit{
+background:linear-gradient(135deg,#174fe0,#6546ef)!important;
+box-shadow:0 0 18px rgba(71,91,255,.22);
+}
+.admin-action.danger{background:linear-gradient(135deg,rgba(142,23,43,.9),rgba(91,15,30,.95))!important;border-color:rgba(255,81,100,.55)!important}
+
+/* ===== MODALS: ALWAYS ABOVE EVERYTHING ===== */
+.modal-backdrop{
+position:fixed!important;
+inset:0!important;
+z-index:30000!important;
+display:none;
+align-items:center!important;
+justify-content:center!important;
+padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom))!important;
+background:rgba(0,5,12,.84)!important;
+backdrop-filter:blur(16px)!important;
+}
+.modal-card{
+position:relative!important;
+z-index:30001!important;
+width:min(92vw,440px)!important;
+max-height:min(82dvh,720px)!important;
+overflow:auto!important;
+border:1px solid rgba(0,177,231,.45)!important;
+background:linear-gradient(155deg,rgba(5,31,51,.99),rgba(1,11,21,.99))!important;
+box-shadow:0 35px 100px rgba(0,0,0,.82),0 0 45px rgba(0,161,217,.16)!important;
+}
+#admin-login-popup{z-index:32000!important}
+#admin-login-popup .modal-card{z-index:32001!important}
+.sheet{z-index:22000!important}
+#admin-panel{
+position:fixed!important;
+left:50%!important;
+bottom:auto!important;
+top:50%!important;
+transform:translate(-50%,-50%)!important;
+width:min(94vw,760px)!important;
+max-height:86dvh!important;
+z-index:25000!important;
+}
+#kick-vote-box{
+position:fixed!important;
+left:50%!important;
+top:50%!important;
+bottom:auto!important;
+transform:translate(-50%,-50%)!important;
+z-index:28000!important;
+width:min(92vw,440px)!important;
+padding:18px!important;
+border:1px solid rgba(255,200,61,.55)!important;
+border-radius:20px!important;
+background:linear-gradient(155deg,rgba(38,29,8,.99),rgba(6,15,24,.99))!important;
+box-shadow:0 30px 90px rgba(0,0,0,.8),0 0 35px rgba(255,200,61,.12)!important;
+}
+#kick-vote-title{font-size:15px!important}
+#kick-vote-meta{font-size:11px!important;line-height:1.45!important;margin:7px 0 13px!important}
+#vote-yes{background:rgba(13,120,74,.85)!important;color:#d9ffed}
+#vote-no{background:rgba(130,26,40,.85)!important;color:#ffe2e6}
+
+/* ===== CHAT: NAME ABOVE MESSAGE ===== */
+.message-wrapper{align-items:flex-end!important}
+.message-wrapper.self{justify-content:flex-end}
+.msg-stack{
+display:flex;
+flex-direction:column;
+gap:3px;
+max-width:min(78%,620px);
+min-width:0;
+}
+.message-wrapper.self .msg-stack{align-items:flex-end}
+.message-wrapper.other .msg-stack{align-items:flex-start}
+.msg-name{
+max-width:100%;
+padding:0 4px;
+font-size:10px;
+line-height:1.15;
+font-weight:800;
+color:#8bbbd0;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+.message-wrapper.self .msg-name{color:#7ce8ff;text-align:right}
+.msg-stack .msg-content{max-width:100%!important;width:max-content}
+.msg-stack .msg-content.other,.msg-stack .msg-content.self{min-width:42px}
+
+/* ===== TOP #1 GOLD ===== */
+.top-row.top-one{
+border-color:rgba(255,200,61,.95)!important;
+background:linear-gradient(135deg,rgba(101,72,8,.35),rgba(11,34,48,.88))!important;
+box-shadow:0 0 0 1px rgba(255,200,61,.2),0 0 22px rgba(255,200,61,.18)!important;
+color:#fff4c1;
+}
+.top-row.top-one strong{color:#ffd34e}
+.player-score.top-one{
+border-color:rgba(255,200,61,.9)!important;
+background:linear-gradient(135deg,rgba(90,61,5,.35),rgba(5,34,56,.82))!important;
+box-shadow:0 0 16px rgba(255,200,61,.15)!important;
+}
+.player-score.top-one::before{content:"👑 ";}
+
+/* ===== SPECTATOR ===== */
+#spectator-banner{
+background:linear-gradient(90deg,rgba(95,61,180,.18),rgba(46,26,101,.28))!important;
+border-color:rgba(156,111,255,.45)!important;
+color:#d9c7ff!important;
+}
+.player-score.spectator{opacity:.72;border-style:dashed!important}
+
+/* ===== MOBILE MODAL FIX ===== */
+@media(max-width:650px){
+.modal-backdrop{padding:12px!important}
+.modal-card{width:100%!important;max-height:84dvh!important;border-radius:20px!important}
+#admin-panel{width:calc(100vw - 16px)!important;max-height:88dvh!important}
+#kick-vote-box{width:calc(100vw - 24px)!important}
+.msg-stack{max-width:82%}
+.msg-name{font-size:9px}
+}
+
+
+/* ===== GAME SCREEN VISUAL V2 ===== */
+#topbar{
+min-height:64px;
+padding:max(8px,env(safe-area-inset-top)) 12px 8px;
+background:linear-gradient(180deg,rgba(3,22,38,.98),rgba(2,14,25,.96));
+border-bottom:1px solid rgba(0,190,245,.28);
+box-shadow:0 7px 24px rgba(0,0,0,.22);
+}
+#back-btn,#desktop-actions button,#mobile-more{
+border-color:rgba(0,184,235,.34);
+background:linear-gradient(145deg,rgba(8,48,76,.92),rgba(3,29,49,.92));
+box-shadow:inset 0 1px rgba(255,255,255,.04);
+}
+#back-btn:hover,#desktop-actions button:hover,#mobile-more:hover{filter:brightness(1.14)}
+#top-center{gap:7px}
+#on-air{
+height:34px;
+background:linear-gradient(135deg,rgba(112,15,34,.45),rgba(50,8,20,.36));
+border-color:rgba(255,69,91,.46);
+box-shadow:0 0 18px rgba(255,50,75,.08);
+}
+#category-chip{
+height:34px;
+background:linear-gradient(135deg,rgba(0,127,174,.17),rgba(5,40,64,.72));
+border-color:rgba(0,196,255,.35);
+}
+#connection-bar{
+height:28px;
+background:rgba(1,11,20,.82);
+border-bottom:1px solid rgba(0,161,217,.11);
+letter-spacing:.02em;
+}
+#spectator-banner{
+padding:9px 12px!important;
+background:linear-gradient(90deg,rgba(91,53,177,.22),rgba(29,21,71,.52))!important;
+box-shadow:inset 0 -1px rgba(166,121,255,.12);
+}
+#secret-area{padding:8px 12px 7px}
+#secret-card{
+min-height:82px;
+border-color:rgba(0,200,255,.52);
+background:linear-gradient(135deg,rgba(4,39,64,.97),rgba(1,18,32,.97));
+box-shadow:0 0 28px rgba(0,161,217,.14),inset 0 1px rgba(255,255,255,.035);
+}
+#secret-label{color:#7db9d0}
+#secret-word{color:#48ddff;text-shadow:0 0 20px rgba(0,190,255,.32)}
+#game-meta{
+min-height:50px;
+padding:7px 10px;
+background:linear-gradient(180deg,rgba(4,25,42,.93),rgba(2,18,31,.9));
+border-top:1px solid rgba(255,255,255,.025);
+border-bottom:1px solid rgba(0,161,217,.17);
+}
+#scoreboard{gap:7px}
+.player-score{
+padding:7px 11px;
+border-radius:13px;
+background:linear-gradient(145deg,rgba(7,45,72,.84),rgba(3,27,47,.82));
+border-color:rgba(0,181,231,.22);
+box-shadow:inset 0 1px rgba(255,255,255,.025);
+font-weight:750;
+}
+.player-score.leader:not(.top-one)::before{content:"🎙 "}
+#name-btn,#history-btn{
+height:34px;
+background:linear-gradient(145deg,rgba(8,48,76,.88),rgba(3,29,49,.88));
+border-color:rgba(0,184,235,.28);
+}
+#chat-box{
+padding:13px 12px 10px;
+background:
+radial-gradient(circle at 50% 0%,rgba(0,161,217,.055),transparent 40%),
+linear-gradient(180deg,rgba(1,8,15,.08),rgba(1,8,15,.25));
+}
+#messages{gap:9px}
+.message-wrapper{gap:8px}
+.msg-avatar{
+width:34px;height:34px;flex-basis:34px;
+border-radius:12px;
+background:linear-gradient(145deg,rgba(9,52,82,.94),rgba(3,28,47,.94));
+border-color:rgba(0,193,245,.25);
+box-shadow:0 5px 14px rgba(0,0,0,.18);
+}
+.msg-stack{gap:4px!important}
+.msg-name{
+font-size:10px!important;
+letter-spacing:.015em;
+color:#86b9cd!important;
+}
+.message-wrapper.self .msg-name{color:#64dcfa!important}
+.msg-content{
+padding:10px 13px;
+border-radius:16px;
+box-shadow:0 5px 16px rgba(0,0,0,.12);
+}
+.msg-content.other{
+background:linear-gradient(145deg,rgba(5,35,57,.96),rgba(3,27,46,.96));
+border-color:rgba(112,204,245,.15);
+}
+.msg-content.self{
+background:linear-gradient(135deg,rgba(0,174,222,.92),rgba(24,100,169,.94));
+border-color:rgba(128,228,255,.25);
+}
+.msg-content.system{
+box-shadow:none;
+background:rgba(4,29,48,.78);
+}
+#bottom{
+padding:8px 10px max(10px,env(safe-area-inset-bottom));
+background:linear-gradient(180deg,rgba(3,21,36,.98),rgba(1,13,24,.99));
+border-top-color:rgba(0,181,231,.25);
+box-shadow:0 -10px 30px rgba(0,0,0,.2);
+}
+#broadcast-status{height:20px;color:#77a9bc}
+#controls{gap:7px}
+#message-input{
+height:45px;
+border-radius:15px;
+background:rgba(1,15,27,.96);
+border-color:rgba(0,181,231,.31);
+}
+#emoji-btn,#send-btn{
+width:45px;height:45px;flex-basis:45px;border-radius:15px;
+}
+#emoji-btn{background:linear-gradient(145deg,rgba(8,48,76,.94),rgba(3,28,48,.94))}
+#send-btn{box-shadow:0 5px 18px rgba(0,161,217,.18)}
+.sheet{
+border-color:rgba(0,190,245,.38)!important;
+background:linear-gradient(155deg,rgba(5,31,51,.99),rgba(1,12,22,.99))!important;
+}
+.sheet-head{
+padding-bottom:9px;
+border-bottom:1px solid rgba(0,161,217,.14);
+}
+.top-row,.history-row{
+min-height:45px;
+background:linear-gradient(145deg,rgba(8,47,74,.78),rgba(4,30,50,.78));
+border-color:rgba(0,161,217,.16);
+}
+.top-row.top-one{
+min-height:51px;
+transform:translateZ(0);
+}
+#mobile-menu{
+z-index:24000!important;
+background:linear-gradient(155deg,rgba(5,31,51,.99),rgba(1,12,22,.99));
+border-color:rgba(0,190,245,.38);
+}
+#mobile-menu button{border:1px solid transparent}
+#mobile-menu button:active{border-color:rgba(0,161,217,.2)}
+#mobile-admin{color:#ffd65d!important}
+#mobile-vote{color:#ffe0a1}
+#vote-start-sheet{z-index:26000!important}
+.vote-player{
+min-height:48px;
+background:linear-gradient(145deg,rgba(7,43,69,.82),rgba(3,27,46,.82));
+}
+.vote-player button{
+min-width:116px;
+background:linear-gradient(135deg,rgba(135,24,43,.88),rgba(84,15,29,.9));
+}
+#admin-panel .sheet-head{color:#ffd65d}
+#admin-panel .admin-input,#admin-panel .admin-select{
+border-color:rgba(0,181,231,.32);
+background:rgba(1,14,25,.96);
+}
+#admin-panel .admin-action:not(.danger):not(.primary){
+background:linear-gradient(145deg,rgba(8,48,76,.9),rgba(3,29,49,.9));
+}
+#admin-panel .admin-action:hover{filter:brightness(1.12)}
+@media(max-width:650px){
+#topbar{min-height:56px;padding:max(6px,env(safe-area-inset-top)) 8px 6px}
+#back-btn{max-width:76px}
+#top-center{justify-content:flex-start}
+#on-air-name{max-width:108px;overflow:hidden;text-overflow:ellipsis}
+#category-chip{max-width:105px}
+#game-meta{min-height:43px;padding:5px 7px}
+.player-score{padding:6px 8px;font-size:9px}
+#chat-box{padding:9px 8px 7px}
+.msg-avatar{width:29px;height:29px;flex-basis:29px;border-radius:10px}
+.msg-stack{max-width:84%!important}
+.msg-content{font-size:13px;padding:9px 11px}
+#bottom{padding:6px 8px max(8px,env(safe-area-inset-bottom))}
+#message-input{height:42px}
+#emoji-btn,#send-btn{width:42px;height:42px;flex-basis:42px}
+#broadcast-status{height:16px}
+#mobile-menu{top:56px}
+}
+
+
+/* ===== ADMIN + VOTE VISUAL V3 ===== */
+#admin-login-popup .modal-card{
+width:min(92vw,390px)!important;
+padding:24px 22px 20px!important;
+border-color:rgba(255,200,61,.55)!important;
+background:
+radial-gradient(circle at 50% -20%,rgba(255,200,61,.10),transparent 42%),
+linear-gradient(160deg,rgba(22,27,34,.99),rgba(5,18,29,.99))!important;
+box-shadow:0 35px 100px rgba(0,0,0,.84),0 0 40px rgba(255,200,61,.12)!important;
+}
+#admin-login-popup h3{
+margin:0 0 6px!important;
+color:#ffd65d;
+font-size:18px;
+letter-spacing:.03em;
+}
+#admin-login-popup h3::after{
+content:"Доступ к управлению эфиром";
+display:block;
+margin-top:6px;
+font-size:10px;
+font-weight:700;
+letter-spacing:.08em;
+color:#8aa7b6;
+}
+#admin-password{
+height:46px;
+border-color:rgba(255,200,61,.38)!important;
+background:rgba(6,19,29,.95)!important;
+}
+#admin-password:focus{
+border-color:rgba(255,210,88,.82)!important;
+box-shadow:0 0 0 3px rgba(255,200,61,.08);
+}
+#admin-login-submit{
+height:46px;
+border:1px solid rgba(255,220,120,.25)!important;
+color:#fff7d6!important;
+font-weight:950!important;
+letter-spacing:.07em;
+background:linear-gradient(135deg,#9d6f08,#e0a91b)!important;
+box-shadow:0 7px 22px rgba(218,164,24,.18)!important;
+}
+#admin-login-error{font-weight:800}
+#admin-panel{
+padding:18px!important;
+border-color:rgba(255,200,61,.48)!important;
+background:
+radial-gradient(circle at 15% 0%,rgba(255,200,61,.075),transparent 36%),
+linear-gradient(160deg,rgba(8,27,42,.995),rgba(2,13,23,.995))!important;
+box-shadow:0 35px 100px rgba(0,0,0,.82),0 0 46px rgba(255,200,61,.09)!important;
+}
+#admin-panel .sheet-head{
+margin-bottom:13px;
+font-size:16px;
+letter-spacing:.03em;
+}
+#admin-session-note{
+padding:8px 10px;
+margin:0 0 13px!important;
+border:1px solid rgba(255,200,61,.15);
+border-radius:11px;
+background:rgba(255,200,61,.045);
+color:#b6a97e!important;
+}
+.admin-field label{
+color:#8fb8c8!important;
+font-size:9px!important;
+letter-spacing:.11em!important;
+}
+.admin-input,.admin-select{
+height:43px!important;
+border-radius:13px!important;
+}
+.admin-select{
+appearance:none;
+background-image:linear-gradient(45deg,transparent 50%,#6fdcff 50%),linear-gradient(135deg,#6fdcff 50%,transparent 50%)!important;
+background-position:calc(100% - 17px) 18px,calc(100% - 12px) 18px!important;
+background-size:5px 5px,5px 5px!important;
+background-repeat:no-repeat!important;
+padding-right:34px!important;
+}
+#admin-panel .admin-action{
+min-height:44px!important;
+border-radius:13px!important;
+font-size:11px;
+letter-spacing:.025em;
+}
+#admin-set-word::before{content:"🔐 ";opacity:.8}
+#admin-set-leader::before{content:"🎙 ";opacity:.8}
+#admin-say-as::before{content:"💬 ";opacity:.8}
+#admin-emoji-as::before{content:"😄 ";opacity:.8}
+#admin-kick{
+min-height:46px!important;
+margin-top:3px;
+font-weight:950!important;
+letter-spacing:.07em;
+}
+#admin-kick::before{content:"⛔ "}
+#admin-toast{
+padding:9px 11px!important;
+font-weight:800;
+}
+#vote-start-sheet{
+padding:16px!important;
+border-color:rgba(255,200,61,.42)!important;
+background:
+radial-gradient(circle at 50% 0%,rgba(255,200,61,.06),transparent 38%),
+linear-gradient(155deg,rgba(8,27,42,.99),rgba(2,13,23,.99))!important;
+}
+#vote-start-sheet .sheet-head{
+color:#ffe08a;
+}
+.vote-player{
+padding:10px 11px!important;
+border-color:rgba(0,180,231,.17)!important;
+}
+.vote-player span{
+font-weight:800;
+}
+.vote-player button{
+height:35px!important;
+border-radius:10px!important;
+font-weight:900!important;
+}
+#kick-vote-box{
+padding:19px 18px!important;
+text-align:center;
+}
+#kick-vote-title{
+color:#ffe28a!important;
+font-size:17px!important;
+letter-spacing:.025em;
+}
+#kick-vote-meta{
+color:#d0c08a!important;
+margin:8px 0 14px!important;
+}
+#kick-vote-actions{gap:9px!important}
+#kick-vote-actions button{
+height:42px!important;
+border-radius:13px!important;
+font-weight:950!important;
+}
+#vote-yes{
+border-color:rgba(67,255,171,.22)!important;
+box-shadow:0 6px 18px rgba(10,129,80,.13);
+}
+#vote-no{
+border-color:rgba(255,92,112,.22)!important;
+box-shadow:0 6px 18px rgba(129,17,40,.13);
+}
+.sheet-close{
+font-size:18px;
+font-weight:900;
+}
+@media(max-width:650px){
+#admin-panel{
+padding:13px!important;
+top:50%!important;
+}
+#admin-panel .admin-grid{
+grid-template-columns:1fr!important;
+gap:6px!important;
+}
+#admin-panel .admin-field{margin-bottom:7px!important}
+#admin-panel .admin-action{min-height:41px!important}
+#admin-session-note{font-size:9px!important}
+#vote-start-sheet{
+width:calc(100vw - 18px)!important;
+bottom:8px!important;
+}
+.vote-player{
+align-items:flex-start!important;
+}
+.vote-player span{font-size:11px!important;padding-top:5px}
+.vote-player button{
+min-width:108px!important;
+font-size:9px!important;
+}
+}
+
+
+/* ===== VISUAL V4: closer to approved mockup ===== */
+:root{
+--ui-bg:#020b14;
+--ui-panel:#031522;
+--ui-panel2:#061c2c;
+--ui-line:#0d6c91;
+--ui-cyan:#17c9ff;
+--ui-blue:#0e76ff;
+--ui-gold:#ffd21f;
+--ui-gold2:#ff9d00;
+}
+#game-screen{
+background:
+linear-gradient(180deg,rgba(1,8,14,.20),rgba(1,8,14,.70)),
+url('img/bg_game.png') center/cover no-repeat,
+url('img/bg_new.png') center/cover no-repeat!important;
+}
+#topbar{
+gap:10px!important;
+padding:max(8px,env(safe-area-inset-top)) 14px 8px!important;
+background:rgba(1,12,22,.96)!important;
+border-bottom:1px solid rgba(12,160,214,.33)!important;
+}
+#back-btn{
+min-width:92px;
+font-size:14px!important;
+}
+#become-leader-btn{
+min-width:126px!important;
+font-size:14px!important;
+background:linear-gradient(180deg,#0c88d3,#086aa7)!important;
+box-shadow:inset 0 1px rgba(255,255,255,.14),0 0 18px rgba(0,160,220,.15)!important;
+}
+#top-center{
+justify-content:center!important;
+}
+#on-air{
+min-width:170px;
+justify-content:center;
+border-radius:14px!important;
+background:rgba(5,16,28,.92)!important;
+border:1px solid rgba(20,113,154,.42)!important;
+}
+#on-air-dot{width:9px!important;height:9px!important}
+#on-air-name{
+font-size:12px!important;
+letter-spacing:.025em;
+}
+#desktop-actions{gap:7px!important}
+#desktop-actions button{
+width:48px!important;
+min-width:48px!important;
+height:44px!important;
+border-radius:13px!important;
+font-size:18px!important;
+padding:0!important;
+}
+#top-btn{color:#ffd857!important}
+#vote-btn{
+color:#ffd857!important;
+border-color:rgba(255,210,31,.78)!important;
+background:linear-gradient(180deg,rgba(68,50,0,.60),rgba(14,21,28,.95))!important;
+box-shadow:0 0 18px rgba(255,210,31,.16)!important;
+position:relative;
+}
+#vote-btn::after{
+content:"Голосовать за кик";
+position:absolute;
+top:52px;
+left:50%;
+transform:translateX(-50%);
+padding:7px 10px;
+border-radius:9px;
+background:rgba(4,23,36,.97);
+border:1px solid rgba(12,114,151,.35);
+font-size:10px;
+line-height:1;
+font-weight:800;
+color:#d9f6ff;
+white-space:nowrap;
+opacity:0;
+pointer-events:none;
+transition:.15s;
+z-index:50000;
+}
+#vote-btn:hover::after{opacity:1}
+#admin-btn{
+width:auto!important;
+min-width:118px!important;
+padding:0 16px!important;
+font-size:14px!important;
+color:#ffd857!important;
+border-color:rgba(255,210,31,.72)!important;
+background:linear-gradient(180deg,rgba(68,50,0,.54),rgba(14,21,28,.95))!important;
+}
+#admin-btn::before{content:"👑 "}
+#admin-btn{font-size:0!important}
+#admin-btn::after{content:"АДМИН";font-size:14px;font-weight:900}
+#dev-btn{display:none!important}
+#connection-bar{display:none!important}
+#game-meta{
+order:3;
+min-height:48px!important;
+padding:7px 12px!important;
+background:rgba(2,16,28,.92)!important;
+}
+#scoreboard{
+display:flex!important;
+gap:7px!important;
+}
+.player-score{
+position:relative;
+padding:7px 11px!important;
+border-radius:13px!important;
+}
+.player-score.top-one{
+color:#ffe76c!important;
+border-color:rgba(255,210,31,.92)!important;
+box-shadow:0 0 18px rgba(255,210,31,.34),inset 0 0 18px rgba(255,210,31,.07)!important;
+}
+#secret-area{
+order:2;
+padding:9px 12px 7px!important;
+}
+#secret-card{
+width:min(620px,100%)!important;
+min-height:92px!important;
+border-radius:18px!important;
+border:1px solid rgba(13,136,184,.48)!important;
+background:rgba(2,18,31,.94)!important;
+}
+#secret-label{font-size:11px!important}
+#secret-word{font-size:clamp(25px,5vw,38px)!important;color:#ffd857!important}
+#chat-box{
+order:4;
+padding:12px 14px 10px!important;
+}
+#bottom{order:5}
+.message-wrapper{
+gap:9px!important;
+}
+.msg-avatar{
+width:38px!important;
+height:38px!important;
+flex-basis:38px!important;
+border-radius:50%!important;
+background:linear-gradient(180deg,#173d68,#142541)!important;
+border:2px solid rgba(53,177,255,.55)!important;
+}
+.msg-stack{
+max-width:min(78%,650px)!important;
+}
+.msg-name{
+font-size:11px!important;
+font-weight:900!important;
+color:#21c8ff!important;
+padding:0 4px!important;
+}
+.msg-content{
+font-size:14px!important;
+padding:10px 13px!important;
+border-radius:12px!important;
+background:rgba(3,19,32,.86)!important;
+border:1px solid rgba(13,93,127,.30)!important;
+box-shadow:none!important;
+}
+.message-wrapper.self .msg-content{
+background:rgba(4,26,42,.94)!important;
+border-color:rgba(18,117,157,.34)!important;
+}
+.message-wrapper.top-player{
+padding:7px 9px;
+border-radius:15px;
+border:1px solid rgba(255,210,31,.9);
+background:linear-gradient(90deg,rgba(72,53,0,.28),rgba(3,18,31,.78));
+box-shadow:0 0 20px rgba(255,210,31,.32),inset 0 0 18px rgba(255,210,31,.05);
+}
+.message-wrapper.top-player .msg-avatar{
+border-color:#ffd21f!important;
+box-shadow:0 0 14px rgba(255,210,31,.32);
+}
+.message-wrapper.top-player .msg-name{
+color:#ffd857!important;
+}
+.message-wrapper.top-player .msg-name::after{
+content:" 👑";
+}
+#bottom{
+background:rgba(1,12,22,.98)!important;
+border-top:1px solid rgba(13,113,153,.36)!important;
+}
+#message-input{
+height:46px!important;
+border-radius:12px!important;
+background:#03131f!important;
+border-color:rgba(16,111,149,.58)!important;
+}
+#emoji-btn,#send-btn{
+height:46px!important;
+width:46px!important;
+flex-basis:46px!important;
+border-radius:12px!important;
+}
+#emoji-row{
+gap:7px!important;
+padding-top:9px!important;
+}
+.emoji-item{
+width:42px!important;
+height:38px!important;
+border-radius:10px!important;
+background:#041a2a!important;
+border-color:rgba(14,95,128,.55)!important;
+}
+#top-sheet{
+width:min(92vw,560px)!important;
+}
+.top-row{
+min-height:48px!important;
+}
+.top-row.top-one{
+border-color:rgba(255,210,31,.95)!important;
+box-shadow:0 0 20px rgba(255,210,31,.30)!important;
+}
+#kick-vote-box{
+width:min(92vw,520px)!important;
+border-color:rgba(20,118,158,.50)!important;
+background:linear-gradient(160deg,#061a29,#020d16)!important;
+}
+#kick-vote-title{
+color:#19cfff!important;
+font-size:18px!important;
+}
+#vote-yes{
+background:linear-gradient(180deg,#0c8c4c,#076a3a)!important;
+}
+#vote-no{
+background:linear-gradient(180deg,#9c2a2a,#731b1b)!important;
+}
+#admin-panel{
+width:min(94vw,840px)!important;
+border-color:rgba(255,210,31,.55)!important;
+}
+#admin-panel .sheet-head{
+color:#ffd857!important;
+}
+#admin-set-word,#admin-set-leader,#admin-say-as,#admin-emoji-as{
+background:#061c2c!important;
+border-color:rgba(20,117,156,.46)!important;
+}
+#admin-kick{
+background:linear-gradient(180deg,#9c2d2d,#731d1d)!important;
+}
+@media(max-width:760px){
+#topbar{gap:6px!important;padding:max(6px,env(safe-area-inset-top)) 7px 6px!important}
+#back-btn{min-width:auto!important;padding:0 9px!important}
+#become-leader-btn{min-width:98px!important;font-size:12px!important}
+#on-air{min-width:0!important}
+#desktop-actions{display:none!important}
+#mobile-more{display:block!important}
+#game-meta{padding:5px 7px!important}
+#scoreboard{overflow-x:auto!important}
+#secret-card{min-height:72px!important}
+#chat-box{padding:9px 8px 7px!important}
+.msg-avatar{width:31px!important;height:31px!important;flex-basis:31px!important}
+.msg-name{font-size:10px!important}
+.msg-content{font-size:13px!important}
+.message-wrapper.top-player{padding:5px 6px}
+}
+
+
+/* ===== V4.2 FIX: keep original topbar layout, only compact buttons ===== */
+#topbar{
+display:flex!important;
+align-items:center!important;
+justify-content:initial!important;
+gap:8px!important;
+}
+#top-center{
+flex:1 1 auto!important;
+min-width:0!important;
+display:flex!important;
+justify-content:center!important;
+}
+#desktop-actions{
+display:flex!important;
+align-items:center!important;
+gap:6px!important;
+flex:0 0 auto!important;
+}
+#desktop-actions button{
+width:40px!important;
+min-width:40px!important;
+height:40px!important;
+padding:0!important;
+flex:0 0 40px!important;
+font-size:16px!important;
+}
+#vote-btn{
+font-size:0!important;
+}
+#vote-btn::before{
+content:"👥";
+font-size:17px!important;
+}
+#vote-btn::after{
+content:"Голосовать за кик";
+top:47px!important;
+font-size:9px!important;
+padding:5px 7px!important;
+}
+#admin-btn{
+width:40px!important;
+min-width:40px!important;
+max-width:40px!important;
+padding:0!important;
+flex:0 0 40px!important;
+font-size:0!important;
+}
+#admin-btn::before{
+content:"👑"!important;
+font-size:17px!important;
+}
+#admin-btn::after{
+content:""!important;
+display:none!important;
+}
+#become-leader-btn{
+width:auto!important;
+min-width:108px!important;
+max-width:138px!important;
+padding:0 12px!important;
+flex:0 0 auto!important;
+font-size:12px!important;
+white-space:nowrap!important;
+}
+#back-btn{
+flex:0 0 auto!important;
+}
+#on-air{
+max-width:210px!important;
+min-width:0!important;
+}
+#on-air-name{
+overflow:hidden!important;
+text-overflow:ellipsis!important;
+white-space:nowrap!important;
+}
+@media(max-width:760px){
+#desktop-actions{display:none!important}
+#mobile-more{display:block!important}
+#topbar{display:flex!important}
+#top-center{justify-content:flex-start!important}
+}
+
+
+/* ===== V4.3 STABLE TOPBAR: no overlaps at any width ===== */
+
+/* Desktop baseline */
+#topbar{
+display:flex!important;
+align-items:center!important;
+gap:8px!important;
+overflow:visible!important;
+}
+#back-btn{
+flex:0 0 auto!important;
+min-width:82px!important;
+max-width:96px!important;
+white-space:nowrap!important;
+}
+#top-center{
+flex:1 1 auto!important;
+min-width:0!important;
+overflow:hidden!important;
+justify-content:center!important;
+}
+#on-air{
+min-width:0!important;
+max-width:190px!important;
+flex:0 1 auto!important;
+}
+#on-air-name{
+display:block!important;
+max-width:150px!important;
+overflow:hidden!important;
+text-overflow:ellipsis!important;
+white-space:nowrap!important;
+}
+#category-chip{
+flex:0 1 auto!important;
+min-width:0!important;
+max-width:135px!important;
+}
+#desktop-actions{
+display:flex!important;
+align-items:center!important;
+justify-content:flex-end!important;
+gap:6px!important;
+flex:0 0 auto!important;
+min-width:max-content!important;
+white-space:nowrap!important;
+}
+#desktop-actions > button{
+position:relative!important;
+box-sizing:border-box!important;
+margin:0!important;
+}
+#become-leader-btn{
+flex:0 0 auto!important;
+width:118px!important;
+min-width:118px!important;
+max-width:118px!important;
+height:40px!important;
+padding:0 10px!important;
+font-size:12px!important;
+overflow:hidden!important;
+text-overflow:ellipsis!important;
+white-space:nowrap!important;
+}
+#top-btn,#restart-btn,#skip-btn,#vote-btn,#admin-btn{
+flex:0 0 40px!important;
+width:40px!important;
+min-width:40px!important;
+max-width:40px!important;
+height:40px!important;
+padding:0!important;
+}
+#top-btn,#restart-btn,#skip-btn{font-size:16px!important}
+#vote-btn{
+font-size:0!important;
+color:#ffd857!important;
+}
+#vote-btn::before{
+content:"👥"!important;
+font-size:17px!important;
+line-height:1!important;
+}
+#vote-btn::after{
+content:"Голосовать за кик"!important;
+position:absolute!important;
+top:46px!important;
+left:50%!important;
+transform:translateX(-50%)!important;
+padding:6px 8px!important;
+border-radius:8px!important;
+background:rgba(3,20,32,.98)!important;
+border:1px solid rgba(25,125,165,.42)!important;
+color:#dff8ff!important;
+font-size:9px!important;
+font-weight:800!important;
+white-space:nowrap!important;
+opacity:0!important;
+pointer-events:none!important;
+z-index:60000!important;
+}
+#vote-btn:hover::after{opacity:1!important}
+#admin-btn{
+font-size:0!important;
+color:#ffd857!important;
+}
+#admin-btn::before{
+content:"👑"!important;
+font-size:17px!important;
+line-height:1!important;
+}
+#admin-btn::after{display:none!important;content:""!important}
+
+/* Medium desktop: keep controls, shorten leader/back text */
+@media (max-width:1080px){
+#topbar{gap:6px!important}
+#back-btn{
+min-width:64px!important;
+max-width:72px!important;
+padding:0 7px!important;
+font-size:11px!important;
+}
+#become-leader-btn{
+width:92px!important;
+min-width:92px!important;
+max-width:92px!important;
+padding:0 7px!important;
+font-size:11px!important;
+}
+#on-air{max-width:145px!important}
+#on-air-name{max-width:112px!important;font-size:10px!important}
+#category-chip{max-width:105px!important}
+#top-btn,#restart-btn,#skip-btn,#vote-btn,#admin-btn{
+flex-basis:36px!important;
+width:36px!important;
+min-width:36px!important;
+max-width:36px!important;
+height:36px!important;
+}
+}
+
+/* Narrow desktop/tablet: icon-only leader button, hide category chip first */
+@media (max-width:920px){
+#category-chip{display:none!important}
+#become-leader-btn{
+font-size:0!important;
+width:40px!important;
+min-width:40px!important;
+max-width:40px!important;
+padding:0!important;
+}
+#become-leader-btn::before{
+content:"🎙"!important;
+font-size:17px!important;
+}
+#back-btn{
+font-size:0!important;
+width:40px!important;
+min-width:40px!important;
+max-width:40px!important;
+padding:0!important;
+}
+#back-btn::before{
+content:"←"!important;
+font-size:18px!important;
+}
+#on-air{max-width:128px!important}
+#on-air-name{max-width:98px!important}
+}
+
+/* At this width stop cramming controls: use existing mobile menu */
+@media (max-width:820px){
+#desktop-actions{display:none!important}
+#mobile-more{
+display:block!important;
+flex:0 0 40px!important;
+width:40px!important;
+height:40px!important;
+}
+#top-center{
+justify-content:flex-start!important;
+}
+#on-air{
+max-width:calc(100vw - 115px)!important;
+}
+}
+
+/* Phone */
+@media (max-width:520px){
+#topbar{
+gap:5px!important;
+padding:max(6px,env(safe-area-inset-top)) 7px 6px!important;
+}
+#back-btn,#mobile-more{
+width:36px!important;
+min-width:36px!important;
+height:36px!important;
+flex-basis:36px!important;
+}
+#on-air{
+max-width:calc(100vw - 95px)!important;
+height:32px!important;
+}
+#on-air-name{
+max-width:calc(100vw - 145px)!important;
+font-size:9px!important;
+}
+}
+
+/* Ensure top scorer glow in chat is strong but does not affect layout */
+.message-wrapper.top-player{
+box-sizing:border-box!important;
+width:auto!important;
+max-width:100%!important;
+}
+.message-wrapper.top-player .msg-stack{
+min-width:0!important;
+}
+
+
+/* ===== V4.4 CLEAN ICONS ===== */
+#become-leader-btn::before,
+#vote-btn::before,
+#admin-btn::before,
+#menu-admin-btn::before,
+#mobile-admin::before,
+#mobile-vote::before{
+content:none!important;
+display:none!important;
+}
+#admin-btn::after{
+content:none!important;
+display:none!important;
+}
+#vote-btn,#admin-btn{
+font-size:17px!important;
+line-height:1!important;
+}
+#become-leader-btn{
+font-size:12px!important;
+}
+#vote-btn::after{
+content:"Голосовать за кик"!important;
+display:block!important;
+position:absolute!important;
+top:46px!important;
+left:50%!important;
+transform:translateX(-50%)!important;
+padding:6px 8px!important;
+border-radius:8px!important;
+background:rgba(3,20,32,.98)!important;
+border:1px solid rgba(25,125,165,.42)!important;
+color:#dff8ff!important;
+font-size:9px!important;
+font-weight:800!important;
+white-space:nowrap!important;
+opacity:0!important;
+pointer-events:none!important;
+z-index:60000!important;
+}
+#vote-btn:hover::after{opacity:1!important}
+@media (max-width:920px){
+#become-leader-btn{
+font-size:0!important;
+}
+#become-leader-btn::after{
+content:"🎙"!important;
+display:block!important;
+font-size:17px!important;
+line-height:1!important;
+}
+#back-btn{
+font-size:0!important;
+}
+#back-btn::after{
+content:"←"!important;
+display:block!important;
+font-size:18px!important;
+line-height:1!important;
+}
+}
+@media (max-width:820px){
+#become-leader-btn::after,#back-btn::after{
+content:none!important;
+display:none!important;
+}
+#become-leader-btn,#back-btn{
+font-size:12px!important;
+}
+}
+
+
+/* ===== V4.5: TOP-1 glow ONLY around the player's own chat bubble ===== */
+
+/* Kill the old full-row highlight completely */
+.message-wrapper.top-player{
+padding:0!important;
+border:0!important;
+background:transparent!important;
+box-shadow:none!important;
+outline:none!important;
+width:auto!important;
+max-width:100%!important;
+}
+
+/* Keep only small gold accents on the top player's own elements */
+.message-wrapper.top-player .msg-avatar{
+border-color:#ffd21f!important;
+box-shadow:0 0 10px rgba(255,210,31,.35)!important;
+}
+.message-wrapper.top-player .msg-name{
+color:#ffd857!important;
+text-shadow:0 0 7px rgba(255,210,31,.20)!important;
+}
+.message-wrapper.top-player .msg-name::after{
+content:" 👑"!important;
+}
+
+/* The actual message bubble gets the gold glow — not the whole row */
+.message-wrapper.top-player .msg-content{
+border:1px solid rgba(255,210,31,.92)!important;
+background:linear-gradient(145deg,rgba(48,38,5,.90),rgba(5,25,38,.96))!important;
+box-shadow:
+0 0 0 1px rgba(255,210,31,.08),
+0 0 12px rgba(255,210,31,.24),
+inset 0 0 10px rgba(255,210,31,.035)!important;
+}
+
+/* Self messages stay right-aligned and glow only around the bubble */
+.message-wrapper.self.top-player{
+justify-content:flex-end!important;
+}
+.message-wrapper.self.top-player .msg-stack{
+align-items:flex-end!important;
+}
+
+/* Prevent any inherited/stretch behavior from making the bubble full width */
+.message-wrapper.top-player .msg-stack{
+width:auto!important;
+max-width:min(78%,650px)!important;
+flex:0 1 auto!important;
+}
+.message-wrapper.top-player .msg-content{
+width:max-content!important;
+max-width:100%!important;
+min-width:0!important;
+}
+
+/* Mobile */
+@media(max-width:650px){
+.message-wrapper.top-player .msg-stack{
+max-width:84%!important;
+}
+.message-wrapper.top-player .msg-content{
+box-shadow:
+0 0 0 1px rgba(255,210,31,.07),
+0 0 9px rgba(255,210,31,.22)!important;
+}
+}
+
 </style>
 </head>
 <body>
@@ -694,10 +1975,12 @@ transition:.22s;
 <img id="brand-logo" src="img/radio-more-logo.png" alt="РАДИО МОРЕ">
 <div id="menu-subtitle">Игра «Крокодил»</div>
 <div id="menu-wave"></div>
+<div id="menu-connection"><span id="menu-connection-dot" class="status-dot yellow"></span><span id="menu-connection-text">Подключение к эфиру...</span></div>
 <div id="menu-actions">
 <button class="image-menu-btn" id="menu-start-btn" aria-label="Начать игру"></button>
 <button class="image-menu-btn" id="menu-lead-btn" aria-label="Стать ведущим"></button>
 </div>
+<button id="menu-admin-btn">👑 АДМИН</button>
 </div>
 </div>
 
@@ -710,15 +1993,18 @@ transition:.22s;
 </div>
 <div id="desktop-actions">
 <button id="become-leader-btn">🎙 Ведущий</button>
-<button id="top-btn">🏆</button>
-<button id="restart-btn">↻</button>
-<button id="skip-btn">⏭</button>
+<button id="top-btn" title="Топ игроков" aria-label="Топ игроков">🏆</button>
+<button id="restart-btn" title="Новая игра" aria-label="Новая игра">↻</button>
+<button id="skip-btn" title="Пропустить слово" aria-label="Пропустить слово">⏭</button>
+<button id="vote-btn" title="Голосовать за кик" aria-label="Голосовать за кик">👥</button>
+<button id="admin-btn" title="Админ" aria-label="Админ">👑</button>
 <button id="dev-btn">DEV</button>
 </div>
 <button id="mobile-more">⋯</button>
 </div>
 
 <div id="connection-bar"><span id="connection-dot"></span><span id="connection-text">Подключение...</span></div>
+<div id="spectator-banner">👁 Вы наблюдатель. В игру войдёте после текущей отгадки.</div>
 
 <div id="secret-area">
 <div id="secret-card">
@@ -732,7 +2018,7 @@ transition:.22s;
 <div id="game-meta">
 <div id="scoreboard"></div>
 <button id="history-btn">✓ <span id="history-count">0</span></button>
-<button id="name-btn">✎</button>
+<button id="name-btn" title="Изменить имя" aria-label="Изменить имя">✎</button>
 </div>
 
 <div id="chat-box"><div id="messages"></div></div>
@@ -785,8 +2071,48 @@ transition:.22s;
 <button id="mobile-lead">🎙 Стать ведущим</button>
 <button id="mobile-top">🏆 Топ игроков</button>
 <button id="mobile-skip">⏭ Пропустить слово</button>
+<button id="mobile-vote">👥 Голосовать за кик</button>
+<button id="mobile-admin">👑 Админ</button>
 <button id="mobile-restart">↻ Новая игра</button>
 <button id="mobile-dev">DEV</button>
+</div>
+
+
+<div id="admin-login-popup" class="modal-backdrop">
+<div class="modal-card">
+<h3>⚙ Вход администратора</h3>
+<div class="admin-field"><label>ПАРОЛЬ</label><input id="admin-password" class="admin-input" type="password" placeholder="Введите пароль"></div>
+<button id="admin-login-submit" class="admin-action primary">ВОЙТИ</button>
+<div id="admin-login-error"></div>
+</div>
+</div>
+<div id="admin-panel" class="sheet">
+<div class="sheet-head"><span>👑 АДМИН-ПАНЕЛЬ</span><button class="sheet-close" data-close="admin-panel" aria-label="Закрыть">×</button></div>
+<div id="admin-session-note">Защищённая сессия администратора · действия применяются сервером.</div>
+<div class="admin-field"><label>ИГРОК</label><select id="admin-player" class="admin-select"></select></div>
+<div class="admin-grid">
+<div class="admin-field"><label>СЛОВО</label><input id="admin-word" class="admin-input" placeholder="Новое слово"></div>
+<div class="admin-field"><label>ЭМОДЗИ ОТ ИГРОКА</label><input id="admin-emoji" class="admin-input" placeholder="😂"></div>
+</div>
+<div class="admin-field"><label>СООБЩЕНИЕ ОТ ИГРОКА</label><input id="admin-message" class="admin-input" placeholder="Текст сообщения"></div>
+<div class="admin-grid">
+<button id="admin-set-word" class="admin-action">Сменить слово</button>
+<button id="admin-set-leader" class="admin-action">Сделать ведущим</button>
+<button id="admin-say-as" class="admin-action">Написать от игрока</button>
+<button id="admin-emoji-as" class="admin-action">Отправить эмодзи</button>
+</div>
+<div class="admin-field" style="margin-top:10px"><label>ПРИЧИНА КИКА</label><input id="admin-kick-reason" class="admin-input" placeholder="Необязательно"></div>
+<button id="admin-kick" class="admin-action danger">КИКНУТЬ ИГРОКА</button>
+<div id="admin-toast"></div>
+</div>
+<div id="vote-start-sheet" class="sheet">
+<div class="sheet-head"><span>⚖ ГОЛОСОВАНИЕ ЗА КИК</span><button class="sheet-close" data-close="vote-start-sheet" aria-label="Закрыть">×</button></div>
+<div id="vote-start-list"></div>
+</div>
+<div id="kick-vote-box">
+<div id="kick-vote-title">⚖ Голосование</div>
+<div id="kick-vote-meta"></div>
+<div id="kick-vote-actions"><button id="vote-yes">✓ ЗА КИК</button><button id="vote-no">✕ ПРОТИВ</button></div>
 </div>
 
 <div id="mechanic-overlay">
@@ -797,161 +2123,63 @@ transition:.22s;
 </div>
 
 <script>
-const WS_URL="wss://62-109-16-64.sslip.io/ws";
 const $=id=>document.getElementById(id);
-const menuScreen=$('menu-screen');
-const gameScreen=$('game-screen');
-const categoryPopup=$('category-popup');
-const namePopup=$('name-popup');
-const nameInput=$('name-input');
-const scoreboard=$('scoreboard');
-const chatBox=$('chat-box');
-const messages=$('messages');
-const input=$('message-input');
-const secretArea=$('secret-area');
-const secretWord=$('secret-word');
-const onAir=$('on-air');
-const onAirName=$('on-air-name');
-const categoryChip=$('category-chip');
-const categoryChipEmoji=$('category-chip-emoji');
-const categoryChipText=$('category-chip-text');
-const connectionDot=$('connection-dot');
-const connectionText=$('connection-text');
-const broadcastStatus=$('broadcast-status');
-const historyCount=$('history-count');
-const historyList=$('history-list');
-const topList=$('top-list');
-const mobileMenu=$('mobile-menu');
+const IS_LOCAL=['localhost','127.0.0.1'].includes(location.hostname);
+const WS_URL=IS_LOCAL?`${location.protocol==='https:'?'wss':'ws'}://${location.host}/ws`:'wss://62-109-16-64.sslip.io/ws';
+const menuScreen=$('menu-screen'),gameScreen=$('game-screen'),categoryPopup=$('category-popup'),namePopup=$('name-popup'),nameInput=$('name-input'),scoreboard=$('scoreboard'),chatBox=$('chat-box'),messages=$('messages'),input=$('message-input'),secretArea=$('secret-area'),secretWord=$('secret-word'),onAir=$('on-air'),onAirName=$('on-air-name'),categoryChip=$('category-chip'),categoryChipEmoji=$('category-chip-emoji'),categoryChipText=$('category-chip-text'),connectionDot=$('connection-dot'),connectionText=$('connection-text'),menuConnectionDot=$('menu-connection-dot'),menuConnectionText=$('menu-connection-text'),broadcastStatus=$('broadcast-status'),historyCount=$('history-count'),historyList=$('history-list'),topList=$('top-list'),mobileMenu=$('mobile-menu'),spectatorBanner=$('spectator-banner');
 const devMode=new URLSearchParams(location.search).get('dev')==='1';
-let socket;
-let myId=null;
-let myEmoji=null;
-let currentLeaderId=null;
-let currentLeaderName='';
-let currentCategory='';
-let currentCategoryEmoji='🎲';
-let latestPlayers=[];
-let guessedWords=[];
-let overlayTimer=null;
-let reconnectTimer=null;
-
+let socket,myId=null,myEmoji=null,currentLeaderId=null,currentLeaderName='',currentCategory='',currentCategoryEmoji='🎲',latestPlayers=[],guessedWords=[],overlayTimer=null,reconnectTimer=null,heartbeatTimer=null,isSpectator=false,isAdmin=false;
+function setConnection(state,text){
+connectionDot.className=state==='green'?'online':state==='red'?'offline':'';
+connectionText.textContent=text;
+menuConnectionDot.className=`status-dot ${state}`;
+menuConnectionText.textContent=text;
+}
 function connect(){
-clearTimeout(reconnectTimer);
-connectionDot.className='';
-connectionText.textContent='Подключение к эфиру...';
-socket=new WebSocket(WS_URL);
-socket.onopen=()=>{
-connectionDot.className='online';
-connectionText.textContent='Связь установлена';
-setTimeout(()=>{
-if(socket.readyState===WebSocket.OPEN)connectionText.textContent='РАДИО МОРЕ онлайн';
-},1200);
-};
-socket.onclose=()=>{
-connectionDot.className='offline';
-connectionText.textContent='Связь потеряна · переподключение...';
-reconnectTimer=setTimeout(connect,1800);
-};
-socket.onerror=()=>{connectionDot.className='offline'};
-socket.onmessage=e=>handleServer(JSON.parse(e.data));
+clearTimeout(reconnectTimer);clearInterval(heartbeatTimer);setConnection('yellow','Подключение к эфиру...');
+try{socket=new WebSocket(WS_URL)}catch(e){setConnection('red','Нет подключения к эфиру');reconnectTimer=setTimeout(connect,1800);return}
+socket.onopen=()=>{setConnection('green','РАДИО МОРЕ онлайн');heartbeatTimer=setInterval(()=>send({action:'ping'}),20000)};
+socket.onclose=()=>{clearInterval(heartbeatTimer);setConnection('red','Нет подключения · повтор...');reconnectTimer=setTimeout(connect,1800)};
+socket.onerror=()=>setConnection('red','Ошибка соединения');
+socket.onmessage=e=>{try{handleServer(JSON.parse(e.data))}catch(err){console.error(err,e.data)}};
 }
+function send(data){if(socket&&socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify(data));else addSystem('Нет соединения с сервером','error')}
 connect();
-
-function send(data){
-if(socket&&socket.readyState===WebSocket.OPEN)socket.send(JSON.stringify(data));
-else addSystem('Нет соединения с сервером','error');
-}
-
-function showOverlay(title,subtitle='',emoji=''){
-$('mechanic-title').textContent=title;
-$('mechanic-subtitle').textContent=subtitle;
-$('mechanic-emoji').textContent=emoji;
-$('mechanic-overlay').classList.add('show');
-clearTimeout(overlayTimer);
-overlayTimer=setTimeout(()=>$('mechanic-overlay').classList.remove('show'),2100);
-}
-
-function scrollBottom(smooth=true){
-requestAnimationFrame(()=>{
-chatBox.scrollTo({top:chatBox.scrollHeight,behavior:smooth?'smooth':'auto'});
-});
-}
-
-function startGameUI(){
-menuScreen.style.display='none';
-gameScreen.style.display='flex';
-setTimeout(()=>scrollBottom(false),60);
-}
-
-function updateBroadcastStatus(){
-const count=latestPlayers.length;
-if(currentLeaderName){
-broadcastStatus.textContent=`РАДИО МОРЕ · в эфире ${count} · ведущий: ${currentLeaderName}`;
-}else{
-broadcastStatus.textContent=`РАДИО МОРЕ · в эфире ${count} · нужен ведущий`;
-}
-}
-
-function updateOnAir(){
-if(currentLeaderId&&currentLeaderName){
-onAir.style.display='flex';
-onAirName.textContent=`В ЭФИРЕ · ${currentLeaderName}`;
-}else{
-onAir.style.display='none';
-}
-updateBroadcastStatus();
-}
-
-function updateCategory(name,emoji='🎲'){
-currentCategory=name||'';
-currentCategoryEmoji=emoji||'🎲';
-if(currentCategory){
-categoryChip.style.display='flex';
-categoryChipEmoji.textContent=currentCategoryEmoji;
-categoryChipText.textContent=currentCategory;
-}else{
-categoryChip.style.display='none';
-}
-}
-
+function showOverlay(title,subtitle='',emoji=''){ $('mechanic-title').textContent=title;$('mechanic-subtitle').textContent=subtitle;$('mechanic-emoji').textContent=emoji;$('mechanic-overlay').classList.add('show');clearTimeout(overlayTimer);overlayTimer=setTimeout(()=>$('mechanic-overlay').classList.remove('show'),2100)}
+function scrollBottom(smooth=true){requestAnimationFrame(()=>chatBox.scrollTo({top:chatBox.scrollHeight,behavior:smooth?'smooth':'auto'}))}
+function startGameUI(){menuScreen.style.display='none';gameScreen.style.display='flex';setTimeout(()=>scrollBottom(false),60)}
+function updateBroadcastStatus(){const count=latestPlayers.length;const watchers=latestPlayers.filter(p=>p.spectator).length;broadcastStatus.textContent=currentLeaderName?`РАДИО МОРЕ · ${count} в эфире${watchers?` · ${watchers} наблюд.`:''} · ведущий: ${currentLeaderName}`:`РАДИО МОРЕ · ${count} в эфире · нужен ведущий`}
+function updateOnAir(){if(currentLeaderId&&currentLeaderName){onAir.style.display='flex';onAirName.textContent=`В ЭФИРЕ · ${currentLeaderName}`}else onAir.style.display='none';updateBroadcastStatus()}
+function updateCategory(name,emoji='🎲'){currentCategory=name||'';currentCategoryEmoji=emoji||'🎲';if(currentCategory){categoryChip.style.display='flex';categoryChipEmoji.textContent=currentCategoryEmoji;categoryChipText.textContent=currentCategory}else categoryChip.style.display='none'}
+function setSpectator(value,announce=false){isSpectator=!!value;spectatorBanner.style.display=isSpectator?'block':'none';input.disabled=isSpectator;$('send-btn').disabled=isSpectator;$('emoji-btn').disabled=isSpectator;$('controls').classList.toggle('spectator-lock',isSpectator);if(isSpectator)input.placeholder='Наблюдение до следующей отгадки...';else input.placeholder='Напишите слово...';if(announce)showOverlay(isSpectator?'РЕЖИМ НАБЛЮДАТЕЛЯ':'ВЫ В ИГРЕ',isSpectator?'Подключитесь после текущей отгадки':'Теперь можно писать и угадывать',isSpectator?'👁':'🌊')}
 function updateScoreboard(players){
 latestPlayers=players||[];
-
-/* Если ведущий сменил имя — обновляем его имя в состоянии */
 if(currentLeaderId){
 const leader=latestPlayers.find(p=>p.id===currentLeaderId);
-if(leader){
-currentLeaderName=leader.name;
+if(leader)currentLeaderName=leader.name;
 }
-}
-
+const me=latestPlayers.find(p=>p.id===myId);
+if(me)setSpectator(me.spectator,false);
 scoreboard.innerHTML='';
-
-[...latestPlayers]
-.sort((a,b)=>b.score-a.score)
-.forEach(p=>{
+const sorted=[...latestPlayers].sort((a,b)=>b.score-a.score||String(a.name).localeCompare(String(b.name),'ru'));
+sorted.forEach((p,i)=>{
 const el=document.createElement('div');
-
-el.className=
-'player-score'+
-(p.id===currentLeaderId?' leader':'');
-
-el.textContent=`${p.name} · ${p.score}`;
-
-if(p.id===myId){
-el.style.borderColor='rgba(255,255,255,.55)';
-}
-
+el.className='player-score'+(p.id===currentLeaderId?' leader':'')+(p.spectator?' spectator':'')+(i===0?' top-one':'');
+el.textContent=`${p.spectator?'👁 ':''}${p.name} · ${p.score}`;
+if(p.id===myId)el.style.outline='1px solid rgba(255,255,255,.45)';
 scoreboard.appendChild(el);
 });
-
-/* Перерисовываем ON AIR и нижний статус */
 updateOnAir();
+refreshAdminPlayers();
 }
-
 function addMessage(text,type='other',avatar=null,name=null,messageId=null,proximity=null){
 const wrap=document.createElement('div');
 wrap.className=`message-wrapper ${type}`;
+if(type==='other'||type==='self'){
+const topPlayer=[...latestPlayers].sort((a,b)=>b.score-a.score||String(a.name).localeCompare(String(b.name),'ru'))[0];
+const msgPlayer=latestPlayers.find(p=>p.name===name);
+if(topPlayer&&msgPlayer&&topPlayer.id===msgPlayer.id)wrap.classList.add('top-player');
+}
 if(messageId)wrap.dataset.messageId=messageId;
 if(type==='other'&&avatar){
 const av=document.createElement('div');
@@ -959,9 +2187,18 @@ av.className='msg-avatar';
 av.textContent=avatar;
 wrap.appendChild(av);
 }
+const normalChat=type==='other'||type==='self';
+const stack=document.createElement('div');
+stack.className=normalChat?'msg-stack':'';
+if(normalChat&&name){
+const nameEl=document.createElement('div');
+nameEl.className='msg-name';
+nameEl.textContent=name;
+stack.appendChild(nameEl);
+}
 const msg=document.createElement('div');
 msg.className=`msg-content ${type}`;
-msg.textContent=(name&&type==='other')?`${name}: ${text}`:text;
+msg.textContent=text;
 if(proximity==='warm')msg.classList.add('guess-warm');
 if(proximity==='hot')msg.classList.add('guess-hot');
 if(messageId&&type==='other'){
@@ -973,41 +2210,19 @@ else if(msg.classList.contains('guess-hot'))level='none';
 send({action:'mark_close',message_id:messageId,level});
 };
 }
+if(normalChat){
+stack.appendChild(msg);
+wrap.appendChild(stack);
+}else{
 wrap.appendChild(msg);
+}
 messages.appendChild(wrap);
 if(messages.children.length>200)messages.removeChild(messages.firstChild);
 scrollBottom();
 }
-
-function addSystem(text,kind='system'){
-addMessage(text,kind);
-}
-
-function applyHeat(id,level){
-const wrap=document.querySelector(`[data-message-id="${id}"]`);
-if(!wrap)return;
-const msg=wrap.querySelector('.msg-content');
-if(!msg)return;
-msg.classList.remove('guess-warm','guess-hot');
-if(level==='warm')msg.classList.add('guess-warm');
-if(level==='hot')msg.classList.add('guess-hot');
-}
-
-function renderHistory(){
-historyCount.textContent=guessedWords.length;
-historyList.innerHTML='';
-if(!guessedWords.length){
-historyList.innerHTML='<div class="history-row"><span>Пока пусто</span></div>';
-return;
-}
-[...guessedWords].reverse().forEach(word=>{
-const row=document.createElement('div');
-row.className='history-row';
-row.innerHTML=`<span>${word}</span><span>✓</span>`;
-historyList.appendChild(row);
-});
-}
-
+function addSystem(text,kind='system'){addMessage(text,kind)}
+function applyHeat(id,level){const wrap=document.querySelector(`[data-message-id="${id}"]`);if(!wrap)return;const msg=wrap.querySelector('.msg-content');if(!msg)return;msg.classList.remove('guess-warm','guess-hot');if(level==='warm')msg.classList.add('guess-warm');if(level==='hot')msg.classList.add('guess-hot')}
+function renderHistory(){historyCount.textContent=guessedWords.length;historyList.innerHTML='';if(!guessedWords.length){historyList.innerHTML='<div class="history-row"><span>Пока пусто</span></div>';return}[...guessedWords].reverse().forEach(word=>{const row=document.createElement('div');row.className='history-row';row.innerHTML=`<span>${escapeHtml(word)}</span><span>✓</span>`;historyList.appendChild(row)})}
 function renderTop(players){
 topList.innerHTML='';
 if(!players||!players.length){
@@ -1015,187 +2230,83 @@ topList.innerHTML='<div class="top-row"><span>Пока пусто</span></div>';
 return;
 }
 const medals=['🥇','🥈','🥉'];
-players.slice(0,10).forEach((p,i)=>{
+players.slice(0,20).forEach((p,i)=>{
 const row=document.createElement('div');
-row.className='top-row';
-row.innerHTML=`<span>${medals[i]||`${i+1}.`} ${p.name}</span><strong>${p.score}</strong>`;
+row.className='top-row'+(i===0?' top-one':'');
+row.innerHTML=`<span>${medals[i]||`${i+1}.`} ${escapeHtml(p.name)}${p.spectator?' · 👁':''}</span><strong>${p.score}</strong>`;
 topList.appendChild(row);
 });
 $('top-sheet').classList.add('open');
 }
-
-function showCategoryPicker(callback){
-categoryPopup.style.display='flex';
-document.querySelectorAll('.cat-btn').forEach(btn=>{
-btn.onclick=()=>{
-categoryPopup.style.display='none';
-callback(btn.dataset.cat,btn.dataset.emoji);
-};
-});
+function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function showCategoryPicker(callback){categoryPopup.style.display='flex';document.querySelectorAll('.cat-btn').forEach(btn=>btn.onclick=()=>{categoryPopup.style.display='none';callback(btn.dataset.cat,btn.dataset.emoji)})}
+function requestLead(){if(isSpectator){showOverlay('НАБЛЮДАТЕЛЬ','Дождитесь текущей отгадки','👁');return}showCategoryPicker(category=>send({action:'take_lead',category}))}
+function requestTop(){send({action:'get_top'})}
+function refreshAdminPlayers(){const select=$('admin-player');if(!select)return;const old=select.value;select.innerHTML=latestPlayers.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} · ${p.id}${p.spectator?' · наблюдатель':''}</option>`).join('');if([...select.options].some(o=>o.value===old))select.value=old}
+function openAdmin(){
+if(isAdmin){
+send({action:'admin_get_state'});
+$('admin-panel').classList.add('open');
+}else{
+$('admin-login-error').textContent='';
+$('admin-login-popup').style.display='flex';
+requestAnimationFrame(()=>{$('admin-login-popup').style.zIndex='32000'});
+setTimeout(()=>$('admin-password').focus(),80);
 }
-
-function requestLead(){
-showCategoryPicker(category=>{
-send({action:'take_lead',category});
-});
 }
-
+function adminToast(text){const el=$('admin-toast');el.textContent=text;el.style.display='block';setTimeout(()=>el.style.display='none',1600)}
+function openVoteStart(){const box=$('vote-start-list');box.innerHTML='';const others=latestPlayers.filter(p=>p.id!==myId);if(!others.length){box.innerHTML='<div class="history-row"><span>Некого кикать</span></div>'}else others.forEach(p=>{const row=document.createElement('div');row.className='vote-player';const name=document.createElement('span');name.textContent=`${p.emoji||''} ${p.name}`;const b=document.createElement('button');b.textContent='Голосовать за кик';b.onclick=()=>{const reason=prompt('Причина голосования (можно пусто):')??'';send({action:'start_kick_vote',target_id:p.id,reason});$('vote-start-sheet').classList.remove('open')};row.append(name,b);box.appendChild(row)});$('vote-start-sheet').classList.add('open')}
+function renderKickVote(data){$('kick-vote-box').style.display='block';$('kick-vote-title').textContent=`⚖ Кикнуть ${data.target_name}?`;$('kick-vote-meta').textContent=`${data.reason?data.reason+' · ':''}ЗА ${data.yes} · ПРОТИВ ${data.no} · нужно ${data.needed} из ${data.eligible}`}
 function handleServer(data){
-if(data.type==='my_info'){
-myId=data.id;
-myEmoji=data.emoji;
-addSystem(`Вы подключились · ID ${myId}`);
-if(data.name)nameInput.placeholder=data.name;
+if(data.type==='pong')return;
+if(data.type==='my_info'){myId=data.id;myEmoji=data.emoji;setSpectator(data.spectator,true);addSystem(`Вы подключились · ID ${myId}`);if(data.name)nameInput.placeholder=data.name}
+else if(data.type==='game_state'){currentLeaderId=data.leader_id;currentLeaderName=data.leader_name||'';updateCategory(data.category,data.category_emoji);setSpectator(data.spectator,true);updateOnAir();startGameUI()}
+else if(data.type==='chat'){addMessage(data.message,data.player_id===myId?'self':'other',data.emoji,data.name,data.message_id,data.proximity)}
+else if(data.type==='system'){addSystem(data.message)}
+else if(data.type==='game_start'){currentLeaderId=data.leader_id;currentLeaderName=data.leader_name||'';updateCategory(data.category,data.category_emoji);updateOnAir();updateScoreboard(latestPlayers);startGameUI();secretArea.style.display=currentLeaderId===myId?'flex':'none'}
+else if(data.type==='leader_changed'){currentLeaderId=data.leader_id;currentLeaderName=data.name||'';updateOnAir();updateScoreboard(latestPlayers);secretArea.style.display=currentLeaderId===myId?'flex':'none';showOverlay('НОВЫЙ ВЕДУЩИЙ',data.name,data.emoji||'🎙')}
+else if(data.type==='category_changed'){updateCategory(data.category,data.emoji);showOverlay('КАТЕГОРИЯ',data.category,data.emoji)}
+else if(data.type==='your_word'){secretArea.style.display='flex';secretWord.textContent=data.word}
+else if(data.type==='player_list'){updateScoreboard(data.players)}
+else if(data.type==='history'){guessedWords=data.words||[];renderHistory()}
+else if(data.type==='word_guessed'){addMessage(`🎉 ${data.message}`,'guessed-anim');secretArea.style.display='none';if(window.confetti)confetti({particleCount:100,spread:70,origin:{y:.6}})}
+else if(data.type==='spectators_promoted'){if((data.player_ids||[]).includes(myId))setSpectator(false,true)}
+else if(data.type==='spectator_notice'){showOverlay('НАБЛЮДАТЕЛЬ',data.message,'👁')}
+else if(data.type==='word_skipped'){addSystem('Ведущий сменил слово')}
+else if(data.type==='top_leader_changed'){showOverlay('НОВЫЙ ЛИДЕР',`${data.name} · ${data.score}`,data.emoji||'🏆')}
+else if(data.type==='leaderboard'){renderTop(data.players)}
+else if(data.type==='message_heat'){applyHeat(data.message_id,data.level)}
+else if(data.type==='game_reset'){currentLeaderId=null;currentLeaderName='';secretArea.style.display='none';setSpectator(false,false);updateOnAir();updateCategory('');showOverlay('НОВАЯ ИГРА','Счёт сброшен','↻')}
+else if(data.type==='leader_left'||data.type==='round_stopped'){currentLeaderId=null;currentLeaderName='';secretArea.style.display='none';setSpectator(false,false);updateOnAir();showOverlay('НУЖЕН ВЕДУЩИЙ','Забирайте эфир','🎙')}
+else if(data.type==='kick_vote_state'){renderKickVote(data)}
+else if(data.type==='kick_vote_closed'){$('kick-vote-box').style.display='none'}
+else if(data.type==='kicked'){alert(`Вы удалены из игры${data.reason?`: ${data.reason}`:''}`);try{socket.close()}catch(e){}}
+else if(data.type==='admin_auth'){if(data.ok){isAdmin=true;$('admin-login-popup').style.display='none';$('admin-password').value='';send({action:'admin_get_state'});$('admin-panel').classList.add('open');adminToast('Вход выполнен')}else $('admin-login-error').textContent=data.message||'Неверный пароль'}
+else if(data.type==='admin_state'){latestPlayers=data.players||latestPlayers;refreshAdminPlayers();$('admin-word').value=data.current_word||''}
+else if(data.type==='admin_ok'){adminToast('Готово');send({action:'admin_get_state'})}
+else if(data.type==='admin_word_changed'){if(currentLeaderId===myId)addSystem('Администратор изменил текущее слово')}
+else if(data.type==='error'){addSystem(`Ошибка: ${data.message}`,'error')}
 }
-else if(data.type==='chat'){
-addMessage(data.message,data.player_id===myId?'self':'other',data.emoji,data.name,data.message_id,data.proximity);
-}
-else if(data.type==='system'){
-addSystem(data.message);
-}
-else if(data.type==='game_start'){
-currentLeaderId=data.leader_id;
-currentLeaderName=data.leader_name||'';
-updateCategory(data.category,data.category_emoji);
-updateOnAir();
-updateScoreboard(latestPlayers);
-startGameUI();
-if(currentLeaderId===myId)secretArea.style.display='flex';
-else secretArea.style.display='none';
-}
-else if(data.type==='leader_changed'){
-currentLeaderId=data.leader_id;
-currentLeaderName=data.name||'';
-updateOnAir();
-updateScoreboard(latestPlayers);
-showOverlay('НОВЫЙ ВЕДУЩИЙ',data.name,data.emoji||'🎙');
-}
-else if(data.type==='category_changed'){
-updateCategory(data.category,data.emoji);
-showOverlay('КАТЕГОРИЯ',data.category,data.emoji);
-}
-else if(data.type==='your_word'){
-secretArea.style.display='flex';
-secretWord.textContent=data.word;
-}
-else if(data.type==='player_list'){
-updateScoreboard(data.players);
-}
-else if(data.type==='history'){
-guessedWords=data.words||[];
-renderHistory();
-}
-else if(data.type==='word_guessed'){
-addMessage(`🎉 ${data.message}`,'guessed-anim');
-secretArea.style.display='none';
-confetti({particleCount:100,spread:70,origin:{y:.6}});
-}
-else if(data.type==='word_skipped'){
-addSystem('Ведущий сменил слово');
-}
-else if(data.type==='top_leader_changed'){
-showOverlay('НОВЫЙ ЛИДЕР',`${data.name} · ${data.score}`,data.emoji||'🏆');
-}
-else if(data.type==='leaderboard'){
-renderTop(data.players);
-}
-else if(data.type==='message_heat'){
-applyHeat(data.message_id,data.level);
-}
-else if(data.type==='game_reset'){
-currentLeaderId=null;
-currentLeaderName='';
-secretArea.style.display='none';
-updateOnAir();
-updateCategory('');
-showOverlay('НОВАЯ ИГРА','Счёт сброшен','↻');
-}
-else if(data.type==='leader_left'||data.type==='round_stopped'){
-currentLeaderId=null;
-currentLeaderName='';
-secretArea.style.display='none';
-updateOnAir();
-showOverlay('НУЖЕН ВЕДУЩИЙ','Забирайте эфир','🎙');
-}
-else if(data.type==='error'){
-addSystem(`Ошибка: ${data.message}`,'error');
-}
-}
-
-$('menu-start-btn').onclick=()=>{
-showCategoryPicker(category=>send({action:'start_game',category}));
-};
-$('menu-lead-btn').onclick=requestLead;
-$('become-leader-btn').onclick=requestLead;
-$('mobile-lead').onclick=()=>{mobileMenu.classList.remove('open');requestLead()};
-$('back-btn').onclick=()=>{
-gameScreen.style.display='none';
-menuScreen.style.display='flex';
-};
-$('top-btn').onclick=()=>send({action:'guess',word:'/top'});
-$('mobile-top').onclick=()=>{mobileMenu.classList.remove('open');send({action:'guess',word:'/top'})};
-$('restart-btn').onclick=()=>send({action:'restart_game'});
-$('mobile-restart').onclick=()=>{mobileMenu.classList.remove('open');send({action:'restart_game'})};
-$('skip-btn').onclick=()=>send({action:'skip_word'});
-$('mobile-skip').onclick=()=>{mobileMenu.classList.remove('open');send({action:'skip_word'})};
-$('dev-btn').onclick=()=>send({action:'dev_win'});
-$('mobile-dev').onclick=()=>{mobileMenu.classList.remove('open');send({action:'dev_win'})};
-$('mobile-more').onclick=e=>{
-e.stopPropagation();
-mobileMenu.classList.toggle('open');
-};
-document.addEventListener('click',e=>{
-if(!mobileMenu.contains(e.target)&&e.target!==$('mobile-more'))mobileMenu.classList.remove('open');
-});
-$('name-btn').onclick=()=>namePopup.style.display='flex';
-$('name-save-btn').onclick=()=>{
-const name=nameInput.value.trim();
-if(!name)return;
-send({action:'set_name',name});
-namePopup.style.display='none';
-nameInput.value='';
-};
-$('history-btn').onclick=()=>{
-renderHistory();
-$('history-sheet').classList.add('open');
-};
-document.querySelectorAll('.sheet-close').forEach(btn=>{
-btn.onclick=()=>$(btn.dataset.close).classList.remove('open');
-});
-$('emoji-btn').onclick=()=>$('emoji-row').classList.toggle('open');
-
-['🌊','⚓','🐊','🔥','👑','🎙️','😄','😂'].forEach(emoji=>{
-const el=document.createElement('span');
-el.className='emoji-item';
-el.textContent=emoji;
-el.onclick=()=>{
-send({action:'guess',word:emoji});
-$('emoji-row').classList.remove('open');
-};
-$('emoji-row').appendChild(el);
-});
-
-function sendCurrent(){
-const text=input.value.trim();
-if(!text)return;
-send({action:'guess',word:text});
-input.value='';
-}
-$('send-btn').onclick=sendCurrent;
-input.addEventListener('keydown',e=>{
-if(e.key==='Enter'){
-e.preventDefault();
-sendCurrent();
-}
-});
-input.addEventListener('focus',()=>{
-setTimeout(()=>scrollBottom(false),180);
-});
-
-if(!devMode){
-$('dev-btn').style.display='none';
-$('mobile-dev').style.display='none';
-}
+$('menu-start-btn').onclick=()=>{if(isSpectator){showOverlay('НАБЛЮДАТЕЛЬ','Дождитесь текущей отгадки','👁');return}showCategoryPicker(category=>send({action:'start_game',category}))};
+$('menu-lead-btn').onclick=requestLead;$('become-leader-btn').onclick=requestLead;$('mobile-lead').onclick=()=>{mobileMenu.classList.remove('open');requestLead()};
+$('back-btn').onclick=()=>{gameScreen.style.display='none';menuScreen.style.display='flex'};
+$('top-btn').onclick=requestTop;$('mobile-top').onclick=()=>{mobileMenu.classList.remove('open');requestTop()};
+$('restart-btn').onclick=()=>send({action:'restart_game'});$('mobile-restart').onclick=()=>{mobileMenu.classList.remove('open');send({action:'restart_game'})};
+$('skip-btn').onclick=()=>send({action:'skip_word'});$('mobile-skip').onclick=()=>{mobileMenu.classList.remove('open');send({action:'skip_word'})};
+$('dev-btn').onclick=()=>send({action:'dev_win'});$('mobile-dev').onclick=()=>{mobileMenu.classList.remove('open');send({action:'dev_win'})};
+$('vote-btn').onclick=openVoteStart;$('mobile-vote').onclick=()=>{mobileMenu.classList.remove('open');openVoteStart()};
+$('admin-btn').onclick=openAdmin;$('menu-admin-btn').onclick=openAdmin;$('mobile-admin').onclick=()=>{mobileMenu.classList.remove('open');openAdmin()};
+$('mobile-more').onclick=e=>{e.stopPropagation();mobileMenu.classList.toggle('open')};document.addEventListener('click',e=>{if(!mobileMenu.contains(e.target)&&e.target!==$('mobile-more'))mobileMenu.classList.remove('open')});
+$('name-btn').onclick=()=>namePopup.style.display='flex';$('name-save-btn').onclick=()=>{const name=nameInput.value.trim();if(!name)return;send({action:'set_name',name});namePopup.style.display='none';nameInput.value=''};
+$('history-btn').onclick=()=>{renderHistory();$('history-sheet').classList.add('open')};document.querySelectorAll('.sheet-close').forEach(btn=>btn.onclick=()=>$(btn.dataset.close).classList.remove('open'));
+$('emoji-btn').onclick=()=>$('emoji-row').classList.toggle('open');['🌊','⚓','🐊','🔥','👑','🎙️','😄','😂'].forEach(emoji=>{const el=document.createElement('span');el.className='emoji-item';el.textContent=emoji;el.onclick=()=>{send({action:'guess',word:emoji});$('emoji-row').classList.remove('open')};$('emoji-row').appendChild(el)});
+function sendCurrent(){const text=input.value.trim();if(!text)return;if(['/top','/топ','топ','/rating','/рейтинг'].includes(text.toLowerCase()))requestTop();else send({action:'guess',word:text});input.value=''}
+$('send-btn').onclick=sendCurrent;input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendCurrent()}});input.addEventListener('focus',()=>setTimeout(()=>scrollBottom(false),180));
+$('vote-yes').onclick=()=>send({action:'vote_kick',vote:'yes'});$('vote-no').onclick=()=>send({action:'vote_kick',vote:'no'});
+$('admin-login-submit').onclick=()=>send({action:'admin_login',password:$('admin-password').value});$('admin-password').addEventListener('keydown',e=>{if(e.key==='Enter')$('admin-login-submit').click()});
+$('admin-set-word').onclick=()=>send({action:'admin_set_word',word:$('admin-word').value});$('admin-set-leader').onclick=()=>send({action:'admin_set_leader',target_id:Number($('admin-player').value)});$('admin-say-as').onclick=()=>send({action:'admin_say_as',target_id:Number($('admin-player').value),message:$('admin-message').value});$('admin-emoji-as').onclick=()=>send({action:'admin_emoji_as',target_id:Number($('admin-player').value),emoji:$('admin-emoji').value});$('admin-kick').onclick=()=>{const id=Number($('admin-player').value);if(!id)return;if(confirm('Точно кикнуть этого игрока?'))send({action:'admin_kick',target_id:id,reason:$('admin-kick-reason').value})};
+[categoryPopup,namePopup,$('admin-login-popup')].forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.style.display='none'}));
+if(!devMode){$('dev-btn').style.display='none';$('mobile-dev').style.display='none'}
 </script>
 </body>
 </html>

@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+venv/
+
+server_backup.py
+docs/*_test.html
