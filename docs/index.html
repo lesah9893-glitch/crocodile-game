@@ -1980,6 +1980,227 @@ box-shadow:
 }
 }
 
+/* ===== V4.6 COMPACT GAME HUD ===== */
+#topbar{
+min-height:56px!important;
+padding:max(8px,env(safe-area-inset-top)) 12px 8px!important;
+gap:8px!important;
+background:rgba(1,12,21,.9)!important;
+border-bottom:1px solid rgba(35,183,229,.22)!important;
+box-shadow:0 8px 28px rgba(0,0,0,.22)!important;
+backdrop-filter:blur(18px)!important;
+}
+#back-btn,#mobile-more,#desktop-actions>button{
+box-sizing:border-box!important;
+width:40px!important;
+min-width:40px!important;
+max-width:40px!important;
+height:40px!important;
+padding:0!important;
+display:inline-flex!important;
+align-items:center!important;
+justify-content:center!important;
+flex:0 0 40px!important;
+border:1px solid rgba(93,196,231,.25)!important;
+border-radius:10px!important;
+background:rgba(7,32,50,.82)!important;
+box-shadow:inset 0 1px 0 rgba(255,255,255,.06)!important;
+color:#dff8ff!important;
+font-size:18px!important;
+line-height:1!important;
+text-shadow:none!important;
+transition:background .16s ease,border-color .16s ease,transform .16s ease,box-shadow .16s ease!important;
+}
+#back-btn:hover,#mobile-more:hover,#desktop-actions>button:hover{
+background:rgba(11,52,78,.95)!important;
+border-color:rgba(63,205,250,.6)!important;
+box-shadow:0 5px 16px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.08)!important;
+transform:translateY(-1px)!important;
+}
+#back-btn:active,#mobile-more:active,#desktop-actions>button:active{
+transform:translateY(0) scale(.96)!important;
+}
+#mobile-more{display:none!important}
+.role-hidden,#desktop-actions>button.role-hidden,#mobile-menu>button.role-hidden{display:none!important}
+#desktop-actions>button{
+position:relative!important;
+overflow:hidden!important;
+isolation:isolate;
+}
+#desktop-actions>button::after{
+content:""!important;
+display:block!important;
+position:absolute!important;
+inset:-20% auto -20% -65%!important;
+width:42%!important;
+background:linear-gradient(100deg,transparent,rgba(255,255,255,.22),transparent)!important;
+transform:skewX(-18deg)!important;
+opacity:0!important;
+pointer-events:none!important;
+}
+#desktop-actions>button:hover::after{animation:toolbarShine .58s ease!important}
+@keyframes toolbarShine{
+0%{left:-65%;opacity:0}
+25%{opacity:.75}
+100%{left:125%;opacity:0}
+}
+@keyframes leaderInvite{
+0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 rgba(20,201,255,0)!important}
+50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 18px rgba(20,201,255,.3)!important}
+}
+#back-btn::before,#back-btn::after,#become-leader-btn::before,
+#vote-btn::before,#admin-btn::before{
+content:none!important;
+display:none!important;
+}
+#become-leader-btn{
+background:linear-gradient(180deg,rgba(17,150,207,.96),rgba(8,91,143,.96))!important;
+border-color:rgba(62,215,255,.62)!important;
+color:#fff!important;
+animation:leaderInvite 2.4s ease-in-out infinite;
+}
+#top-btn,#admin-btn{
+color:#ffda55!important;
+border-color:rgba(255,210,31,.34)!important;
+background:rgba(52,43,9,.68)!important;
+}
+#vote-btn{color:#9eeaff!important}
+#desktop-actions{gap:6px!important}
+#top-center{min-width:0!important;justify-content:center!important}
+#on-air{
+width:auto!important;
+max-width:min(210px,100%)!important;
+height:36px!important;
+padding:0 12px!important;
+border-radius:10px!important;
+background:rgba(4,24,39,.82)!important;
+border-color:rgba(72,179,215,.25)!important;
+}
+#on-air-name{
+max-width:170px!important;
+font-size:10px!important;
+letter-spacing:.04em!important;
+overflow:hidden!important;
+text-overflow:ellipsis!important;
+white-space:nowrap!important;
+}
+#category-chip{border-radius:9px!important}
+#secret-area{
+padding:10px 12px 8px!important;
+background:transparent!important;
+}
+#secret-card{
+width:min(620px,100%)!important;
+min-height:72px!important;
+padding:10px 18px!important;
+border-radius:14px!important;
+border:1px solid rgba(48,180,226,.38)!important;
+background:linear-gradient(135deg,rgba(3,25,41,.94),rgba(2,15,27,.96))!important;
+box-shadow:0 12px 34px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.035)!important;
+}
+#secret-card>div{width:100%;min-width:0}
+#secret-card::after{width:120px!important;opacity:.09!important}
+#secret-label{
+margin-bottom:5px!important;
+font-size:9px!important;
+letter-spacing:.11em!important;
+color:#85b8cb!important;
+}
+#secret-word{
+max-width:100%!important;
+font-size:30px!important;
+line-height:1.05!important;
+letter-spacing:0!important;
+white-space:nowrap!important;
+overflow:hidden!important;
+text-overflow:clip!important;
+color:#ffda55!important;
+text-shadow:0 0 14px rgba(255,199,41,.16)!important;
+}
+#game-meta{
+min-height:46px!important;
+padding:6px 10px!important;
+gap:8px!important;
+background:rgba(2,16,27,.9)!important;
+border-top:1px solid rgba(43,156,194,.08)!important;
+border-bottom:1px solid rgba(43,156,194,.18)!important;
+}
+.player-score,#history-btn,#name-btn{
+height:32px!important;
+display:inline-flex!important;
+align-items:center!important;
+justify-content:center!important;
+border-radius:8px!important;
+border:1px solid rgba(80,178,210,.24)!important;
+background:rgba(6,36,55,.78)!important;
+box-shadow:none!important;
+}
+.player-score{padding:0 10px!important;font-size:10px!important}
+.player-score.top-one{
+border-color:rgba(255,210,31,.55)!important;
+box-shadow:inset 3px 0 0 #ffd21f!important;
+}
+#history-btn,#name-btn{padding:0 10px!important;font-size:10px!important}
+#vote-start-sheet{
+position:absolute!important;
+left:50%!important;
+bottom:max(12px,env(safe-area-inset-bottom))!important;
+z-index:300!important;
+width:min(94vw,480px)!important;
+border-radius:16px!important;
+box-shadow:0 24px 70px rgba(0,0,0,.72),0 0 0 1px rgba(255,210,31,.08)!important;
+}
+.vote-player{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+margin-top:7px;
+border:1px solid rgba(75,186,222,.2);
+border-radius:10px;
+background:rgba(7,37,56,.72);
+}
+.vote-player button{
+flex:0 0 auto;
+padding:0 12px;
+border:1px solid rgba(255,210,31,.35);
+background:rgba(64,49,8,.72);
+color:#ffe383;
+cursor:pointer;
+transition:transform .15s ease,background .15s ease,border-color .15s ease;
+}
+.vote-player button:hover{transform:translateY(-1px);background:rgba(92,69,8,.86);border-color:rgba(255,218,70,.65)}
+@media(max-width:820px){
+#desktop-actions{display:none!important}
+#mobile-more{display:inline-flex!important}
+#on-air{max-width:calc(100vw - 108px)!important}
+}
+@media(max-width:520px){
+#topbar{min-height:50px!important;padding:max(6px,env(safe-area-inset-top)) 7px 6px!important}
+#back-btn,#mobile-more{width:36px!important;min-width:36px!important;max-width:36px!important;height:36px!important;flex-basis:36px!important}
+#on-air{height:34px!important;max-width:calc(100vw - 94px)!important}
+#secret-area{padding:6px 8px!important}
+#secret-card{min-height:62px!important;padding:8px 12px!important;border-radius:12px!important}
+#secret-label{font-size:8px!important;margin-bottom:4px!important}
+#game-meta{min-height:42px!important;padding:5px 7px!important}
+.player-score,#history-btn,#name-btn{height:30px!important}
+}
+@media(max-height:600px){
+#secret-area{padding-top:6px!important;padding-bottom:6px!important}
+#secret-card{min-height:60px!important}
+}
+@media(max-height:420px) and (min-width:821px){
+#topbar{min-height:50px!important;padding:max(5px,env(safe-area-inset-top)) 10px 5px!important}
+#back-btn,#desktop-actions>button{width:36px!important;min-width:36px!important;max-width:36px!important;height:36px!important;flex-basis:36px!important;font-size:16px!important}
+#desktop-actions{gap:5px!important}
+#on-air{height:32px!important}
+#secret-area{padding:4px 10px!important}
+#secret-card{min-height:54px!important;padding:6px 16px!important}
+#secret-label{margin-bottom:3px!important;font-size:8px!important}
+#game-meta{min-height:40px!important;padding:4px 8px!important}
+.player-score,#history-btn,#name-btn{height:30px!important}
+}
+
 </style>
 </head>
 <body>
@@ -2000,19 +2221,18 @@ box-shadow:
 
 <div id="game-screen">
 <div id="topbar">
-<button id="back-btn">← Назад</button>
+<button id="back-btn" title="Назад" aria-label="Назад">←</button>
 <div id="top-center">
 <div id="on-air"><span id="on-air-dot"></span><span id="on-air-name">В ЭФИРЕ</span></div>
 <div id="category-chip"><span id="category-chip-emoji">🎲</span><span id="category-chip-text">Случайная</span></div>
 </div>
 <div id="desktop-actions">
-<button id="become-leader-btn">🎙 Ведущий</button>
+<button id="become-leader-btn" title="Стать ведущим" aria-label="Стать ведущим">🎙</button>
 <button id="top-btn" title="Топ игроков" aria-label="Топ игроков">🏆</button>
 <button id="restart-btn" title="Новая игра" aria-label="Новая игра">↻</button>
 <button id="skip-btn" title="Пропустить слово" aria-label="Пропустить слово">⏭</button>
 <button id="vote-btn" title="Голосовать за кик" aria-label="Голосовать за кик">👥</button>
 <button id="admin-btn" title="Админ" aria-label="Админ">👑</button>
-<button id="dev-btn">DEV</button>
 </div>
 <button id="mobile-more">⋯</button>
 </div>
@@ -2088,7 +2308,6 @@ box-shadow:
 <button id="mobile-vote">👥 Голосовать за кик</button>
 <button id="mobile-admin">👑 Админ</button>
 <button id="mobile-restart">↻ Новая игра</button>
-<button id="mobile-dev">DEV</button>
 </div>
 
 
@@ -2141,7 +2360,6 @@ const $=id=>document.getElementById(id);
 const IS_LOCAL=['localhost','127.0.0.1'].includes(location.hostname);
 const WS_URL=IS_LOCAL?`${location.protocol==='https:'?'wss':'ws'}://${location.host}/ws`:'wss://62-109-16-64.sslip.io/ws';
 const menuScreen=$('menu-screen'),gameScreen=$('game-screen'),categoryPopup=$('category-popup'),namePopup=$('name-popup'),nameInput=$('name-input'),scoreboard=$('scoreboard'),chatBox=$('chat-box'),messages=$('messages'),input=$('message-input'),secretArea=$('secret-area'),secretWord=$('secret-word'),onAir=$('on-air'),onAirName=$('on-air-name'),categoryChip=$('category-chip'),categoryChipEmoji=$('category-chip-emoji'),categoryChipText=$('category-chip-text'),connectionDot=$('connection-dot'),connectionText=$('connection-text'),menuConnectionDot=$('menu-connection-dot'),menuConnectionText=$('menu-connection-text'),broadcastStatus=$('broadcast-status'),historyCount=$('history-count'),historyList=$('history-list'),topList=$('top-list'),mobileMenu=$('mobile-menu'),spectatorBanner=$('spectator-banner');
-const devMode=new URLSearchParams(location.search).get('dev')==='1';
 let socket,myId=null,myEmoji=null,currentLeaderId=null,currentLeaderName='',currentCategory='',currentCategoryEmoji='🎲',latestPlayers=[],guessedWords=[],overlayTimer=null,reconnectTimer=null,heartbeatTimer=null,isSpectator=false,isAdmin=false;
 function setConnection(state,text){
 connectionDot.className=state==='green'?'online':state==='red'?'offline':'';
@@ -2161,9 +2379,22 @@ function send(data){if(socket&&socket.readyState===WebSocket.OPEN)socket.send(JS
 connect();
 function showOverlay(title,subtitle='',emoji=''){ $('mechanic-title').textContent=title;$('mechanic-subtitle').textContent=subtitle;$('mechanic-emoji').textContent=emoji;$('mechanic-overlay').classList.add('show');clearTimeout(overlayTimer);overlayTimer=setTimeout(()=>$('mechanic-overlay').classList.remove('show'),2100)}
 function scrollBottom(smooth=true){requestAnimationFrame(()=>chatBox.scrollTo({top:chatBox.scrollHeight,behavior:smooth?'smooth':'auto'}))}
+function fitSecretWord(){
+const max=innerWidth<=520?24:innerHeight<=600?26:30,min=16;
+let size=max;
+secretWord.style.fontSize=`${size}px`;
+while(size>min&&secretWord.scrollWidth>secretWord.clientWidth){size-=1;secretWord.style.fontSize=`${size}px`}
+}
+addEventListener('resize',()=>requestAnimationFrame(fitSecretWord));
 function startGameUI(){menuScreen.style.display='none';gameScreen.style.display='flex';setTimeout(()=>scrollBottom(false),60)}
 function updateBroadcastStatus(){const count=latestPlayers.length;const watchers=latestPlayers.filter(p=>p.spectator).length;broadcastStatus.textContent=currentLeaderName?`РАДИО МОРЕ · ${count} в эфире${watchers?` · ${watchers} наблюд.`:''} · ведущий: ${currentLeaderName}`:`РАДИО МОРЕ · ${count} в эфире · нужен ведущий`}
-function updateOnAir(){if(currentLeaderId&&currentLeaderName){onAir.style.display='flex';onAirName.textContent=`В ЭФИРЕ · ${currentLeaderName}`}else onAir.style.display='none';updateBroadcastStatus()}
+function updateRoleControls(){
+const hasLeader=currentLeaderId!==null&&currentLeaderId!==undefined;
+const amLeader=hasLeader&&currentLeaderId===myId;
+[$('menu-lead-btn'),$('become-leader-btn'),$('mobile-lead')].forEach(el=>el.classList.toggle('role-hidden',hasLeader));
+[$('restart-btn'),$('skip-btn'),$('mobile-restart'),$('mobile-skip')].forEach(el=>el.classList.toggle('role-hidden',!amLeader));
+}
+function updateOnAir(){if(currentLeaderId&&currentLeaderName){onAir.style.display='flex';onAirName.textContent=`В ЭФИРЕ · ${currentLeaderName}`}else onAir.style.display='none';updateBroadcastStatus();updateRoleControls()}
 function updateCategory(name,emoji='🎲'){currentCategory=name||'';currentCategoryEmoji=emoji||'🎲';if(currentCategory){categoryChip.style.display='flex';categoryChipEmoji.textContent=currentCategoryEmoji;categoryChipText.textContent=currentCategory}else categoryChip.style.display='none'}
 function setSpectator(value,announce=false){isSpectator=!!value;spectatorBanner.style.display=isSpectator?'block':'none';input.disabled=isSpectator;$('send-btn').disabled=isSpectator;$('emoji-btn').disabled=isSpectator;$('controls').classList.toggle('spectator-lock',isSpectator);if(isSpectator)input.placeholder='Наблюдение до следующей отгадки...';else input.placeholder='Напишите слово...';if(announce)showOverlay(isSpectator?'РЕЖИМ НАБЛЮДАТЕЛЯ':'ВЫ В ИГРЕ',isSpectator?'Подключитесь после текущей отгадки':'Теперь можно писать и угадывать',isSpectator?'👁':'🌊')}
 function updateScoreboard(players){
@@ -2254,7 +2485,7 @@ $('top-sheet').classList.add('open');
 }
 function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function showCategoryPicker(callback){categoryPopup.style.display='flex';document.querySelectorAll('.cat-btn').forEach(btn=>btn.onclick=()=>{categoryPopup.style.display='none';callback(btn.dataset.cat,btn.dataset.emoji)})}
-function requestLead(){if(isSpectator){showOverlay('НАБЛЮДАТЕЛЬ','Дождитесь текущей отгадки','👁');return}showCategoryPicker(category=>send({action:'take_lead',category}))}
+function requestLead(){if(currentLeaderId){showOverlay('ЭФИР ЗАНЯТ',`${currentLeaderName||'Другой игрок'} уже ведущий`,'🎙');return}if(isSpectator){showOverlay('НАБЛЮДАТЕЛЬ','Дождитесь текущей отгадки','👁');return}showCategoryPicker(category=>send({action:'take_lead',category}))}
 function requestTop(){send({action:'get_top'})}
 function refreshAdminPlayers(){const select=$('admin-player');if(!select)return;const old=select.value;select.innerHTML=latestPlayers.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} · ${p.id}${p.spectator?' · наблюдатель':''}</option>`).join('');if([...select.options].some(o=>o.value===old))select.value=old}
 function openAdmin(){
@@ -2273,14 +2504,14 @@ function openVoteStart(){const box=$('vote-start-list');box.innerHTML='';const o
 function renderKickVote(data){$('kick-vote-box').style.display='block';$('kick-vote-title').textContent=`⚖ Кикнуть ${data.target_name}?`;$('kick-vote-meta').textContent=`${data.reason?data.reason+' · ':''}ЗА ${data.yes} · ПРОТИВ ${data.no} · нужно ${data.needed} из ${data.eligible}`}
 function handleServer(data){
 if(data.type==='pong')return;
-if(data.type==='my_info'){myId=data.id;myEmoji=data.emoji;setSpectator(data.spectator,true);addSystem(`Вы подключились · ID ${myId}`);if(data.name)nameInput.placeholder=data.name}
+if(data.type==='my_info'){myId=data.id;myEmoji=data.emoji;setSpectator(data.spectator,true);updateRoleControls();addSystem(`Вы подключились · ID ${myId}`);if(data.name)nameInput.placeholder=data.name}
 else if(data.type==='game_state'){currentLeaderId=data.leader_id;currentLeaderName=data.leader_name||'';updateCategory(data.category,data.category_emoji);setSpectator(data.spectator,true);updateOnAir();startGameUI()}
 else if(data.type==='chat'){addMessage(data.message,data.player_id===myId?'self':'other',data.emoji,data.name,data.message_id,data.proximity)}
 else if(data.type==='system'){addSystem(data.message)}
 else if(data.type==='game_start'){currentLeaderId=data.leader_id;currentLeaderName=data.leader_name||'';updateCategory(data.category,data.category_emoji);updateOnAir();updateScoreboard(latestPlayers);startGameUI();secretArea.style.display=currentLeaderId===myId?'flex':'none'}
 else if(data.type==='leader_changed'){currentLeaderId=data.leader_id;currentLeaderName=data.name||'';updateOnAir();updateScoreboard(latestPlayers);secretArea.style.display=currentLeaderId===myId?'flex':'none';showOverlay('НОВЫЙ ВЕДУЩИЙ',data.name,data.emoji||'🎙')}
 else if(data.type==='category_changed'){updateCategory(data.category,data.emoji);showOverlay('КАТЕГОРИЯ',data.category,data.emoji)}
-else if(data.type==='your_word'){secretArea.style.display='flex';secretWord.textContent=data.word}
+else if(data.type==='your_word'){secretArea.style.display='flex';secretWord.textContent=data.word;requestAnimationFrame(fitSecretWord)}
 else if(data.type==='player_list'){updateScoreboard(data.players)}
 else if(data.type==='history'){guessedWords=data.words||[];renderHistory()}
 else if(data.type==='word_guessed'){addMessage(`🎉 ${data.message}`,'guessed-anim');secretArea.style.display='none';if(window.confetti)confetti({particleCount:100,spread:70,origin:{y:.6}})}
@@ -2307,7 +2538,6 @@ $('back-btn').onclick=()=>{gameScreen.style.display='none';menuScreen.style.disp
 $('top-btn').onclick=requestTop;$('mobile-top').onclick=()=>{mobileMenu.classList.remove('open');requestTop()};
 $('restart-btn').onclick=()=>send({action:'restart_game'});$('mobile-restart').onclick=()=>{mobileMenu.classList.remove('open');send({action:'restart_game'})};
 $('skip-btn').onclick=()=>send({action:'skip_word'});$('mobile-skip').onclick=()=>{mobileMenu.classList.remove('open');send({action:'skip_word'})};
-$('dev-btn').onclick=()=>send({action:'dev_win'});$('mobile-dev').onclick=()=>{mobileMenu.classList.remove('open');send({action:'dev_win'})};
 $('vote-btn').onclick=openVoteStart;$('mobile-vote').onclick=()=>{mobileMenu.classList.remove('open');openVoteStart()};
 $('admin-btn').onclick=openAdmin;$('menu-admin-btn').onclick=openAdmin;$('mobile-admin').onclick=()=>{mobileMenu.classList.remove('open');openAdmin()};
 $('mobile-more').onclick=e=>{e.stopPropagation();mobileMenu.classList.toggle('open')};document.addEventListener('click',e=>{if(!mobileMenu.contains(e.target)&&e.target!==$('mobile-more'))mobileMenu.classList.remove('open')});
@@ -2320,7 +2550,7 @@ $('vote-yes').onclick=()=>send({action:'vote_kick',vote:'yes'});$('vote-no').onc
 $('admin-login-submit').onclick=()=>send({action:'admin_login',password:$('admin-password').value});$('admin-password').addEventListener('keydown',e=>{if(e.key==='Enter')$('admin-login-submit').click()});
 $('admin-set-word').onclick=()=>send({action:'admin_set_word',word:$('admin-word').value});$('admin-set-leader').onclick=()=>send({action:'admin_set_leader',target_id:Number($('admin-player').value)});$('admin-say-as').onclick=()=>send({action:'admin_say_as',target_id:Number($('admin-player').value),message:$('admin-message').value});$('admin-emoji-as').onclick=()=>send({action:'admin_emoji_as',target_id:Number($('admin-player').value),emoji:$('admin-emoji').value});$('admin-kick').onclick=()=>{const id=Number($('admin-player').value);if(!id)return;if(confirm('Точно кикнуть этого игрока?'))send({action:'admin_kick',target_id:id,reason:$('admin-kick-reason').value})};
 [categoryPopup,namePopup,$('admin-login-popup')].forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.style.display='none'}));
-if(!devMode){$('dev-btn').style.display='none';$('mobile-dev').style.display='none'}
+updateRoleControls();
 </script>
 </body>
 </html>

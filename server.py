@@ -452,6 +452,9 @@ async def websocket_endpoint(websocket: WebSocket):
                 continue
 
             if action == "restart_game":
+                if room.leader_id != player_id:
+                    await websocket.send_json({"type":"error","message":"Только ведущий может начать новую игру."})
+                    continue
                 room.reset_state()
                 for p in room.players.values():
                     p["score"] = 0
