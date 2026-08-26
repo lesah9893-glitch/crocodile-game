@@ -2066,22 +2066,23 @@ background:rgba(52,43,9,.68)!important;
 }
 #vote-btn{color:#9eeaff!important}
 #desktop-actions{gap:6px!important}
-#top-center{min-width:0!important;justify-content:center!important}
+#top-center{min-width:0!important;justify-content:center!important;overflow:visible!important}
 #on-air{
 width:auto!important;
-max-width:min(210px,100%)!important;
+max-width:none!important;
 height:36px!important;
 padding:0 12px!important;
 border-radius:10px!important;
 background:rgba(4,24,39,.82)!important;
 border-color:rgba(72,179,215,.25)!important;
+flex:0 0 auto!important;
 }
 #on-air-name{
-max-width:170px!important;
+max-width:none!important;
 font-size:10px!important;
 letter-spacing:.04em!important;
-overflow:hidden!important;
-text-overflow:ellipsis!important;
+overflow:visible!important;
+text-overflow:clip!important;
 white-space:nowrap!important;
 }
 #category-chip{border-radius:9px!important}
@@ -2170,10 +2171,86 @@ cursor:pointer;
 transition:transform .15s ease,background .15s ease,border-color .15s ease;
 }
 .vote-player button:hover{transform:translateY(-1px);background:rgba(92,69,8,.86);border-color:rgba(255,218,70,.65)}
+#menu-info-actions{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
+margin-top:10px;
+}
+#menu-card{max-height:calc(100dvh - 24px);overflow-y:auto;scrollbar-width:none}
+#menu-card::-webkit-scrollbar{display:none}
+.menu-info-btn{
+height:40px;
+display:flex;
+align-items:center;
+justify-content:center;
+gap:7px;
+padding:0 10px;
+border:1px solid rgba(77,182,219,.25);
+border-radius:10px;
+background:rgba(5,31,48,.72);
+color:#bfe9f7;
+font-size:10px;
+font-weight:850;
+letter-spacing:.03em;
+cursor:pointer;
+}
+.menu-info-btn:hover{
+transform:translateY(-1px);
+border-color:rgba(74,209,251,.55);
+background:rgba(8,47,70,.88);
+box-shadow:0 7px 18px rgba(0,0,0,.2);
+}
+.info-modal-card{position:relative;width:min(92vw,460px)!important;padding:22px!important;border-radius:16px!important}
+.info-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.info-modal-head h3{margin:0!important;text-align:left!important;font-size:17px;letter-spacing:0}
+.info-modal-close{
+width:34px;
+height:34px;
+flex:0 0 34px;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:0;
+border:1px solid rgba(82,183,218,.24);
+border-radius:9px;
+background:rgba(7,37,56,.8);
+color:#dff7ff;
+font-size:20px;
+cursor:pointer;
+}
+.rules-list{margin:0;padding:0;list-style:none;counter-reset:rules}
+.rules-list li{
+counter-increment:rules;
+position:relative;
+padding:10px 0 10px 38px;
+border-top:1px solid rgba(87,171,200,.13);
+color:#d8edf5;
+font-size:13px;
+line-height:1.45;
+}
+.rules-list li::before{
+content:counter(rules);
+position:absolute;
+left:0;
+top:9px;
+width:25px;
+height:25px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:8px;
+background:rgba(13,117,165,.24);
+color:#68dcff;
+font-size:11px;
+font-weight:900;
+}
+.developers-empty{height:72px}
 @media(max-width:820px){
 #desktop-actions{display:none!important}
 #mobile-more{display:inline-flex!important}
 #on-air{max-width:calc(100vw - 108px)!important}
+#on-air-name{max-width:100%!important;font-size:9px!important}
 }
 @media(max-width:520px){
 #topbar{min-height:50px!important;padding:max(6px,env(safe-area-inset-top)) 7px 6px!important}
@@ -2216,6 +2293,31 @@ transition:transform .15s ease,background .15s ease,border-color .15s ease;
 <button class="image-menu-btn" id="menu-lead-btn"><span class="menu-action-icon" aria-hidden="true">🎙</span><span class="menu-action-label">СТАТЬ ВЕДУЩИМ</span></button>
 </div>
 <button id="menu-admin-btn">👑 АДМИН</button>
+<div id="menu-info-actions">
+<button class="menu-info-btn" id="menu-rules-btn"><span aria-hidden="true">?</span><span>ПРАВИЛА ИГРЫ</span></button>
+<button class="menu-info-btn" id="menu-developers-btn"><span aria-hidden="true">⌘</span><span>РАЗРАБОТЧИКИ</span></button>
+</div>
+</div>
+</div>
+
+<div id="rules-popup" class="modal-backdrop">
+<div class="modal-card info-modal-card" role="dialog" aria-modal="true" aria-labelledby="rules-title">
+<div class="info-modal-head"><h3 id="rules-title">Правила игры</h3><button class="info-modal-close" data-modal-close="rules-popup" aria-label="Закрыть">×</button></div>
+<ol class="rules-list">
+<li>Один игрок становится ведущим и получает секретное слово.</li>
+<li>Ведущий объясняет слово, не называя его, однокоренные слова и прямой перевод.</li>
+<li>Остальные игроки отправляют варианты ответа в чат.</li>
+<li>Первый точный ответ приносит игроку очко. Угадавший становится следующим ведущим.</li>
+<li>Если слово слишком сложное, ведущий может пропустить его и получить новое.</li>
+<li>Не подсказывайте буквами и не мешайте другим игрокам спамом.</li>
+</ol>
+</div>
+</div>
+
+<div id="developers-popup" class="modal-backdrop">
+<div class="modal-card info-modal-card" role="dialog" aria-modal="true" aria-labelledby="developers-title">
+<div class="info-modal-head"><h3 id="developers-title">Разработчики</h3><button class="info-modal-close" data-modal-close="developers-popup" aria-label="Закрыть">×</button></div>
+<div class="developers-empty"></div>
 </div>
 </div>
 
@@ -2540,6 +2642,9 @@ $('restart-btn').onclick=()=>send({action:'restart_game'});$('mobile-restart').o
 $('skip-btn').onclick=()=>send({action:'skip_word'});$('mobile-skip').onclick=()=>{mobileMenu.classList.remove('open');send({action:'skip_word'})};
 $('vote-btn').onclick=openVoteStart;$('mobile-vote').onclick=()=>{mobileMenu.classList.remove('open');openVoteStart()};
 $('admin-btn').onclick=openAdmin;$('menu-admin-btn').onclick=openAdmin;$('mobile-admin').onclick=()=>{mobileMenu.classList.remove('open');openAdmin()};
+$('menu-rules-btn').onclick=()=>$('rules-popup').style.display='flex';
+$('menu-developers-btn').onclick=()=>$('developers-popup').style.display='flex';
+document.querySelectorAll('[data-modal-close]').forEach(btn=>btn.onclick=()=>$(btn.dataset.modalClose).style.display='none');
 $('mobile-more').onclick=e=>{e.stopPropagation();mobileMenu.classList.toggle('open')};document.addEventListener('click',e=>{if(!mobileMenu.contains(e.target)&&e.target!==$('mobile-more'))mobileMenu.classList.remove('open')});
 $('name-btn').onclick=()=>namePopup.style.display='flex';$('name-save-btn').onclick=()=>{const name=nameInput.value.trim();if(!name)return;send({action:'set_name',name});namePopup.style.display='none';nameInput.value=''};
 $('history-btn').onclick=()=>{renderHistory();$('history-sheet').classList.add('open')};document.querySelectorAll('.sheet-close').forEach(btn=>btn.onclick=()=>$(btn.dataset.close).classList.remove('open'));
@@ -2549,7 +2654,7 @@ $('send-btn').onclick=sendCurrent;input.addEventListener('keydown',e=>{if(e.key=
 $('vote-yes').onclick=()=>send({action:'vote_kick',vote:'yes'});$('vote-no').onclick=()=>send({action:'vote_kick',vote:'no'});
 $('admin-login-submit').onclick=()=>send({action:'admin_login',password:$('admin-password').value});$('admin-password').addEventListener('keydown',e=>{if(e.key==='Enter')$('admin-login-submit').click()});
 $('admin-set-word').onclick=()=>send({action:'admin_set_word',word:$('admin-word').value});$('admin-set-leader').onclick=()=>send({action:'admin_set_leader',target_id:Number($('admin-player').value)});$('admin-say-as').onclick=()=>send({action:'admin_say_as',target_id:Number($('admin-player').value),message:$('admin-message').value});$('admin-emoji-as').onclick=()=>send({action:'admin_emoji_as',target_id:Number($('admin-player').value),emoji:$('admin-emoji').value});$('admin-kick').onclick=()=>{const id=Number($('admin-player').value);if(!id)return;if(confirm('Точно кикнуть этого игрока?'))send({action:'admin_kick',target_id:id,reason:$('admin-kick-reason').value})};
-[categoryPopup,namePopup,$('admin-login-popup')].forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.style.display='none'}));
+[categoryPopup,namePopup,$('admin-login-popup'),$('rules-popup'),$('developers-popup')].forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.style.display='none'}));
 updateRoleControls();
 </script>
 </body>
