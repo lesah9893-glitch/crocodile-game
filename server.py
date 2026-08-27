@@ -2,8 +2,10 @@ import asyncio
 import os
 import random
 import re
+import time
 from difflib import SequenceMatcher
 from pathlib import Path
+from urllib.parse import urlparse
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -65,6 +67,14 @@ AVATARS = ["🐊","💀","🍕","🎉","👑","⚓","😄","😂","🤖","🦁",
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "change-me-local")
 DEV_MODE = env_flag("DEV_MODE")
 KICK_THRESHOLD = 0.60
+KICK_VOTE_SECONDS = 30
+RADIO_MESSAGES = [
+    "🌊 Волна принята. Радио Море продолжает эфир!",
+    "📻 Слово поймано чисто, без помех.",
+    "⚓ Отличная отгадка. Держим курс на следующее слово!",
+    "🎙 В студии жарко, а эфир только набирает обороты.",
+    "🐊 Крокодил доволен. Продолжаем!",
+]
 
 def normalize_word(text: str) -> str:
     text = (text or "").lower().strip().replace("ё","е")
@@ -85,6 +95,25 @@ def get_proximity(guess: str, answer: str):
         return "warm"
     return None
 
+
+def safe_avatar_url(value) -> str:
+    if not isinstance(value, str) or len(value) > 700:
+        return ""
+    try:
+        parsed = urlparse(value.strip())
+    except ValueError:
+        return ""
+    host = (parsed.hostname or "").lower()
+    allowed = (
+        host == "vk.com"
+        or host.endswith(".vk.com")
+        or host == "userapi.com"
+        or host.endswith(".userapi.com")
+        or host == "vkuserphoto.ru"
+        or host.endswith(".vkuserphoto.ru")
+    )
+    return value.strip() if parsed.scheme == "https" and allowed else ""
+
 class GameRoom:
     def __init__(self):
         self.players = {}
@@ -98,6 +127,10 @@ class GameRoom:
         self.recent_messages = {}
         self.top_leader_id = None
         self.kick_vote = None
+        self.kick_vote_task = None
+        self.kick_vote_token = 0
+        self.combo = 0
+        self.spectator_mode_enabled = False
 
     async def broadcast(self, data):
         sockets = list(self.players)
@@ -125,6 +158,7 @@ class GameRoom:
         self.reset_state()
 
     def reset_state(self):
+        self.cancel_kick_vote_timer()
         self.leader_id = None
         self.current_word = None
         self.category = None
@@ -134,6 +168,13 @@ class GameRoom:
         self.recent_messages = {}
         self.top_leader_id = None
         self.kick_vote = None
+        self.combo = 0
+
+    def cancel_kick_vote_timer(self):
+        task = self.kick_vote_task
+        self.kick_vote_task = None
+        if task and not task.done():
+            task.cancel()
 
     def get_player_list(self):
         return [{
@@ -141,6 +182,7 @@ class GameRoom:
             "emoji": p["emoji"],
             "score": p["score"],
             "name": p["name"],
+            "avatar_url": p.get("avatar_url", ""),
             "spectator": p.get("spectator", False),
         } for p in self.players.values()]
 
@@ -178,6 +220,11 @@ class GameRoom:
         self.words_pool.remove(word)
         return word
 
+    def rotate_category(self):
+        categories = [name for name in WORD_BANK if name != self.category]
+        self.category = random.choice(categories or list(WORD_BANK))
+        self.words_pool = self.build_pool(self.category)
+
     def create_message_id(self):
         self.message_counter += 1
         return f"msg-{self.message_counter}"
@@ -187,6 +234,19 @@ class GameRoom:
         if len(self.recent_messages) > 150:
             first = next(iter(self.recent_messages))
             del self.recent_messages[first]
+
+    def get_reply_snapshot(self, message_id):
+        if not isinstance(message_id, str) or len(message_id) > 32:
+            return None
+        original = self.recent_messages.get(message_id)
+        if not original:
+            return None
+        return {
+            "message_id": original["message_id"],
+            "player_id": original["player_id"],
+            "name": original["name"],
+            "message": original["message"][:140],
+        }
 
     async def send_rankings(self, ws=None):
         payload = {"type":"leaderboard","players":self.get_rankings()}
@@ -213,9 +273,10 @@ class GameRoom:
             await self.broadcast({
                 "type":"top_leader_changed",
                 "player_id":new_top["id"],
-                "name":new_top["name"],
-                "emoji":new_top["emoji"],
-                "score":new_top["score"],
+            "name":new_top["name"],
+            "emoji":new_top["emoji"],
+            "avatar_url":new_top.get("avatar_url", ""),
+            "score":new_top["score"],
                 "previous_id":old_id,
             })
 
@@ -228,6 +289,7 @@ class GameRoom:
             "leader_id":player["id"],
             "name":player["name"],
             "emoji":player["emoji"],
+            "avatar_url":player.get("avatar_url", ""),
         })
 
     async def announce_category(self):
@@ -272,6 +334,7 @@ class GameRoom:
             "leader_id":leader["id"],
             "leader_name":leader["name"],
             "leader_emoji":leader["emoji"],
+            "leader_avatar_url":leader.get("avatar_url", ""),
             "category":self.category,
             "category_emoji":CATEGORY_EMOJIS.get(self.category,"🎲"),
             "message":f"{leader['name']} стал ведущим! Категория: {self.category}",
@@ -286,6 +349,7 @@ class GameRoom:
             return
         solved_word = self.current_word
         winner["score"] += 1
+        self.combo += 1
         self.guessed_history.append(solved_word)
         if len(self.guessed_history) > 10:
             self.guessed_history.pop(0)
@@ -295,27 +359,34 @@ class GameRoom:
             "winner_id":winner["id"],
             "winner_name":winner["name"],
             "winner_emoji":winner["emoji"],
+            "winner_avatar_url":winner.get("avatar_url", ""),
             "word":solved_word,
             "score":winner["score"],
+            "combo":self.combo,
             "message":f"{winner['name']} угадал слово «{solved_word}»!" + (" (DEV)" if dev else ""),
         })
         await self.broadcast({"type":"history","words":self.guessed_history})
         await self.promote_spectators()
         await self.broadcast({"type":"player_list","players":self.get_player_list()})
         await self.check_top_leader()
-        await self.start_round(announce_category=False)
+        if random.random() < 0.35:
+            await self.broadcast({"type":"radio_message","message":random.choice(RADIO_MESSAGES)})
+        self.rotate_category()
+        await self.start_round(announce_category=True)
 
-    async def emit_chat(self, player, text, proximity=None, admin_injected=False):
+    async def emit_chat(self, player, text, proximity=None, admin_injected=False, reply_to=None):
         message_id = self.create_message_id()
         data = {
             "type":"chat",
             "message_id":message_id,
             "player_id":player["id"],
             "emoji":player["emoji"],
+            "avatar_url":player.get("avatar_url", ""),
             "name":player["name"],
             "message":text,
             "proximity":proximity,
             "admin_injected":admin_injected,
+            "reply_to":self.get_reply_snapshot(reply_to),
         }
         self.remember_message(message_id, data)
         await self.broadcast(data)
@@ -326,13 +397,13 @@ class GameRoom:
             return
         target_ws, target = self.get_player_by_id(self.kick_vote["target_id"])
         if not target:
-            self.kick_vote = None
-            await self.broadcast({"type":"kick_vote_closed"})
+            await self.close_kick_vote("Игрок уже вышел.")
             return
         eligible = [p["id"] for p in self.players.values() if p["id"] != target["id"]]
         yes_count = len(self.kick_vote["yes"] & set(eligible))
         no_count = len(self.kick_vote["no"] & set(eligible))
         needed = max(1, int(len(eligible) * KICK_THRESHOLD + 0.999999))
+        remaining = len(eligible) - yes_count - no_count
         await self.broadcast({
             "type":"kick_vote_state",
             "target_id":target["id"],
@@ -342,9 +413,46 @@ class GameRoom:
             "no":no_count,
             "eligible":len(eligible),
             "needed":needed,
+            "expires_in":max(0, int(self.kick_vote["expires_at"] - time.time() + 0.999999)),
         })
         if eligible and yes_count >= needed:
             await self.kick_player(target["id"], reason="Голосование игроков")
+        elif yes_count + remaining < needed:
+            await self.close_kick_vote("Недостаточно голосов за кик.")
+
+    async def start_kick_vote(self, target_id, reason, starter_id):
+        self.kick_vote_token += 1
+        token = self.kick_vote_token
+        self.kick_vote = {
+            "target_id":target_id,
+            "reason":reason,
+            "yes":{starter_id},
+            "no":set(),
+            "expires_at":time.time() + KICK_VOTE_SECONDS,
+            "token":token,
+        }
+        self.cancel_kick_vote_timer()
+        self.kick_vote_task = asyncio.create_task(self.expire_kick_vote(token))
+        await self.broadcast_vote_state()
+
+    async def expire_kick_vote(self, token):
+        try:
+            await asyncio.sleep(KICK_VOTE_SECONDS)
+        except asyncio.CancelledError:
+            return
+        if self.kick_vote and self.kick_vote.get("token") == token:
+            self.kick_vote_task = None
+            await self.close_kick_vote("Время голосования истекло.")
+
+    async def close_kick_vote(self, message=""):
+        had_vote = bool(self.kick_vote)
+        self.kick_vote = None
+        task = self.kick_vote_task
+        self.kick_vote_task = None
+        if task and task is not asyncio.current_task() and not task.done():
+            task.cancel()
+        if had_vote:
+            await self.broadcast({"type":"kick_vote_closed","message":message})
 
     async def kick_player(self, target_id, reason=""):
         ws, target = self.get_player_by_id(target_id)
@@ -358,11 +466,12 @@ class GameRoom:
             pass
         self.players.pop(ws, None)
         if self.kick_vote and self.kick_vote.get("target_id") == target["id"]:
-            self.kick_vote = None
+            await self.close_kick_vote("Игрок удалён по итогам голосования.")
         if was_leader:
             self.leader_id = None
             self.current_word = None
             self.is_active = False
+            self.combo = 0
         await self.broadcast({"type":"system","message":f"Игрок {target['name']} покинул эфир."})
         await self.broadcast({"type":"player_list","players":self.get_player_list()})
         if was_leader:
@@ -382,12 +491,18 @@ async def websocket_endpoint(websocket: WebSocket):
         player_id = random.randint(1000,9999)
     player_emoji = random.choice(AVATARS)
     default_name = f"{player_emoji} #{player_id}"
-    spectator = bool(room.is_active and room.leader_id and room.current_word)
+    spectator = bool(
+        room.spectator_mode_enabled
+        and room.is_active
+        and room.leader_id
+        and room.current_word
+    )
     room.players[websocket] = {
         "id":player_id,
         "emoji":player_emoji,
         "score":0,
         "name":default_name,
+        "avatar_url":"",
         "spectator":spectator,
         "is_admin":False,
     }
@@ -396,6 +511,7 @@ async def websocket_endpoint(websocket: WebSocket):
         "id":player_id,
         "emoji":player_emoji,
         "name":default_name,
+        "avatar_url":"",
         "spectator":spectator,
     })
     if room.is_active and room.leader_id:
@@ -405,6 +521,7 @@ async def websocket_endpoint(websocket: WebSocket):
             "active":True,
             "leader_id":room.leader_id,
             "leader_name":leader["name"] if leader else "",
+            "leader_avatar_url":leader.get("avatar_url", "") if leader else "",
             "category":room.category,
             "category_emoji":CATEGORY_EMOJIS.get(room.category,"🎲"),
             "spectator":spectator,
@@ -438,13 +555,25 @@ async def websocket_endpoint(websocket: WebSocket):
                 continue
 
             if action == "set_name":
-                new_name = text_value(data, "name", 15)
+                new_name = text_value(data, "name", 30)
                 if new_name:
                     player["name"] = new_name
                     await websocket.send_json({"type":"system","message":f"✅ Ваше имя: {new_name}"})
                     await room.broadcast({"type":"player_list","players":room.get_player_list()})
                     if room.leader_id == player_id:
                         await room.announce_leader(player_id)
+                continue
+
+            if action == "set_profile":
+                profile_name = text_value(data, "name", 30)
+                avatar_url = safe_avatar_url(data.get("avatar_url"))
+                if profile_name:
+                    player["name"] = profile_name
+                if avatar_url:
+                    player["avatar_url"] = avatar_url
+                await room.broadcast({"type":"player_list","players":room.get_player_list()})
+                if room.leader_id == player_id:
+                    await room.announce_leader(player_id)
                 continue
 
             if action == "get_top":
@@ -491,12 +620,21 @@ async def websocket_endpoint(websocket: WebSocket):
                     await websocket.send_json({"type":"error","message":"Только ведущий может пропустить слово."})
                     continue
                 old_word = room.current_word
+                room.combo = 0
+                room.rotate_category()
                 room.current_word = room.next_word()
                 if not room.current_word:
                     await websocket.send_json({"type":"error","message":"Не удалось выбрать слово."})
                     continue
-                await room.broadcast({"type":"word_skipped","word":old_word,"leader_id":player_id})
+                await room.broadcast({
+                    "type":"word_skipped",
+                    "word":old_word,
+                    "leader_id":player_id,
+                    "category":room.category,
+                    "category_emoji":CATEGORY_EMOJIS.get(room.category,"🎲"),
+                })
                 await room.broadcast({"type":"system","message":"⏭ Ведущий пропустил слово."})
+                await room.announce_category()
                 await room.send_word_to_leader()
                 continue
 
@@ -507,6 +645,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 room.is_active = False
                 room.leader_id = None
                 room.current_word = None
+                room.combo = 0
                 await room.promote_spectators()
                 await room.broadcast({"type":"system","message":"Раунд завершён. Можно выбрать нового ведущего."})
                 await room.broadcast({"type":"round_stopped"})
@@ -541,13 +680,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 if room.kick_vote:
                     await websocket.send_json({"type":"error","message":"Голосование уже идёт."})
                     continue
-                room.kick_vote = {
-                    "target_id":target["id"],
-                    "reason":reason,
-                    "yes":{player_id},
-                    "no":set(),
-                }
-                await room.broadcast_vote_state()
+                await room.start_kick_vote(target["id"], reason, player_id)
                 continue
 
             if action == "vote_kick":
@@ -590,7 +723,23 @@ async def websocket_endpoint(websocket: WebSocket):
                         "current_word":room.current_word,
                         "category":room.category,
                         "is_active":room.is_active,
+                        "spectator_mode_enabled":room.spectator_mode_enabled,
                     })
+                    continue
+
+                if action == "admin_set_spectator_mode":
+                    enabled = data.get("enabled")
+                    if not isinstance(enabled, bool):
+                        await websocket.send_json({"type":"error","message":"Некорректное значение режима наблюдателя."})
+                        continue
+                    room.spectator_mode_enabled = enabled
+                    if not enabled:
+                        await room.promote_spectators()
+                    await room.broadcast({
+                        "type":"spectator_mode_changed",
+                        "enabled":enabled,
+                    })
+                    await websocket.send_json({"type":"admin_ok","action":"set_spectator_mode"})
                     continue
 
                 if action == "admin_set_word":
@@ -669,6 +818,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 raw_text = text_value(data, "word", 500)
                 if not raw_text:
                     continue
+                reply_to = data.get("reply_to")
                 normalized = normalize_word(raw_text)
                 if normalized in ("/top","/топ","топ","/rating","/рейтинг"):
                     await room.send_rankings(websocket)
@@ -680,13 +830,13 @@ async def websocket_endpoint(websocket: WebSocket):
                     })
                     continue
                 if room.leader_id == player_id:
-                    await room.emit_chat(player, raw_text, proximity=None)
+                    await room.emit_chat(player, raw_text, proximity=None, reply_to=reply_to)
                     continue
                 if room.is_active and room.leader_id and room.current_word:
                     if normalized == normalize_word(room.current_word):
                         await room.word_guessed(websocket)
                         continue
-                    await room.emit_chat(player, raw_text, proximity=get_proximity(raw_text,room.current_word))
+                    await room.emit_chat(player, raw_text, proximity=get_proximity(raw_text,room.current_word), reply_to=reply_to)
                 else:
                     await websocket.send_json({"type":"error","message":"Игра ещё не начата."})
                 continue
@@ -701,7 +851,7 @@ async def websocket_endpoint(websocket: WebSocket):
                         "message":"Вы наблюдаете за текущим раундом. После отгадки сможете писать.",
                     })
                     continue
-                await room.emit_chat(player, text, proximity=None)
+                await room.emit_chat(player, text, proximity=None, reply_to=data.get("reply_to"))
 
     except WebSocketDisconnect:
         pass
@@ -712,7 +862,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 room.kick_vote["yes"].discard(leaving_player["id"])
                 room.kick_vote["no"].discard(leaving_player["id"])
                 if room.kick_vote.get("target_id") == leaving_player["id"]:
-                    room.kick_vote = None
+                    await room.close_kick_vote("Игрок вышел из игры.")
                 elif room.kick_vote:
                     await room.broadcast_vote_state()
             await room.broadcast({"type":"system","message":"Игрок покинул чат."})
@@ -721,6 +871,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 room.leader_id = None
                 room.current_word = None
                 room.is_active = False
+                room.combo = 0
                 await room.promote_spectators()
                 await room.broadcast({"type":"leader_left","player_id":leaving_player["id"]})
                 await room.broadcast({"type":"system","message":"Ведущий вышел. Выберите нового ведущего."})

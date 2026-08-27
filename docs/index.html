@@ -9,9 +9,11 @@
 <script src="./vk-bridge.min.js"></script>
 <script>
 if(window.vkBridge){
-vkBridge.send('VKWebAppInit')
-.then(()=>console.log('VKWebAppInit: OK'))
-.catch(err=>console.error('VKWebAppInit:',err));
+window.vkUserProfilePromise=vkBridge.send('VKWebAppInit')
+.then(()=>vkBridge.send('VKWebAppGetUserInfo'))
+.catch(err=>{console.warn('VK profile unavailable:',err);return null});
+}else{
+window.vkUserProfilePromise=Promise.resolve(null);
 }
 </script>
 <style>
@@ -809,6 +811,17 @@ animation:reactionFloat 1.45s ease-out forwards;
 .admin-action.danger{background:rgba(111,18,37,.72);border-color:rgba(255,80,108,.4)}
 #admin-login-error{min-height:18px;margin-top:7px;color:#ff9daf;font-size:11px;text-align:center}
 #admin-session-note{font-size:10px;color:#79a4b8;text-align:center;margin:4px 0 12px}
+.admin-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 0 13px;margin-bottom:12px;border-bottom:1px solid rgba(0,161,217,.16)}
+.admin-toggle-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+.admin-toggle-copy strong{font-size:11px;color:#eefaff}
+.admin-toggle-copy span{font-size:9px;line-height:1.35;color:#79a4b8}
+.admin-switch{position:relative;display:block;flex:0 0 auto;width:46px;height:26px;cursor:pointer}
+.admin-switch input{position:absolute;opacity:0;pointer-events:none}
+.admin-switch-track{display:block;width:100%;height:100%;border:1px solid rgba(125,174,195,.4);border-radius:13px;background:#061725;transition:background .2s,border-color .2s,box-shadow .2s}
+.admin-switch-track::after{content:"";position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:50%;background:#91a9b5;box-shadow:0 2px 7px rgba(0,0,0,.45);transition:transform .2s,background .2s}
+.admin-switch input:checked+.admin-switch-track{border-color:#20e4bd;background:rgba(17,115,98,.72);box-shadow:0 0 15px rgba(32,228,189,.18)}
+.admin-switch input:checked+.admin-switch-track::after{transform:translateX(20px);background:#d9fff6}
+.admin-switch input:focus-visible+.admin-switch-track{outline:2px solid #20e4bd;outline-offset:3px}
 #vote-start-list{display:flex;flex-direction:column;gap:7px}
 .vote-player{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid rgba(0,161,217,.14);border-radius:12px;background:rgba(5,35,57,.7)}
 .vote-player span{flex:1;font-size:12px}
@@ -2402,6 +2415,118 @@ text-transform:uppercase;
 .player-score,#history-btn,#name-btn{height:30px!important}
 }
 
+/* ===== V5 SOCIAL + MOBILE + GAME FEEDBACK ===== */
+.msg-stack{position:relative!important}
+.msg-head{padding-right:34px!important}
+.reply-message-btn{
+position:absolute!important;
+top:-3px!important;
+right:0!important;
+z-index:4!important;
+width:29px!important;
+height:27px!important;
+border:1px solid rgba(75,194,231,.3)!important;
+border-radius:8px!important;
+background:rgba(5,40,59,.94)!important;
+color:#8ce8ff!important;
+font-size:16px!important;
+opacity:.9!important;
+box-shadow:0 4px 12px rgba(0,0,0,.2)!important;
+}
+.reply-message-btn:hover{opacity:1!important;background:rgba(9,73,99,.98)!important;transform:translateY(-1px)}
+.msg-reply-quote{
+margin:-2px -3px 8px!important;
+padding:7px 9px!important;
+border-left-color:#4cdbff!important;
+background:rgba(1,13,23,.48)!important;
+box-shadow:inset 0 0 0 1px rgba(87,202,235,.08)!important;
+}
+.msg-reply-name{color:#8de9ff!important;font-size:10px!important}
+.msg-reply-text{color:#d2e8ef!important;font-size:11px!important}
+.msg-avatar{overflow:hidden;border-radius:50%!important}
+.msg-avatar img,.player-avatar{
+width:100%;height:100%;display:block;object-fit:cover;border-radius:50%;
+}
+.player-score{gap:6px!important}
+.player-avatar{width:20px;height:20px;flex:0 0 20px;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(255,255,255,.22);border-radius:50%;font-size:12px}
+.top-identity{display:flex;align-items:center;gap:8px;min-width:0}
+.top-avatar{width:27px;height:27px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 27px;overflow:hidden;border-radius:50%;background:rgba(8,43,62,.9);font-size:15px}
+.top-avatar img{width:100%;height:100%;object-fit:cover}
+.player-score.top-one{
+position:relative;
+color:#fff0a1!important;
+border-color:rgba(255,211,48,.72)!important;
+background:linear-gradient(135deg,rgba(83,61,5,.84),rgba(16,33,42,.92))!important;
+box-shadow:inset 3px 0 0 #ffd530,0 0 15px rgba(255,205,27,.16)!important;
+animation:leaderGold 2.4s ease-in-out infinite;
+}
+@keyframes leaderGold{50%{box-shadow:inset 3px 0 0 #ffe66a,0 0 23px rgba(255,205,27,.3)}}
+.message-wrapper.top-player .msg-content{
+border-color:rgba(255,213,55,.86)!important;
+box-shadow:0 0 14px rgba(255,205,31,.2)!important;
+}
+.msg-content.guess-warm{
+border-color:rgba(255,91,76,.76)!important;
+background:linear-gradient(145deg,rgba(82,28,27,.84),rgba(28,25,35,.94))!important;
+box-shadow:0 0 10px rgba(255,73,60,.25)!important;
+}
+.msg-content.guess-warm::after{content:"  ТЕПЛО"!important;color:#ff9b8d!important}
+.msg-content.guess-hot{
+border-color:#ffca43!important;
+background:linear-gradient(135deg,rgba(139,37,13,.96),rgba(65,16,15,.97))!important;
+box-shadow:0 0 0 1px rgba(255,226,92,.28),0 0 18px rgba(255,77,24,.7),0 0 38px rgba(255,40,16,.3)!important;
+animation:hotPop .55s cubic-bezier(.2,1.8,.4,1),hotBurn .8s ease-in-out .55s infinite alternate!important;
+}
+.msg-content.guess-hot::after{content:"  БЛИЗКО!"!important;color:#ffe175!important;text-shadow:0 0 8px #ff541f}
+@keyframes hotPop{0%{transform:scale(.82);opacity:.45}55%{transform:scale(1.1)}100%{transform:scale(1)}}
+@keyframes hotBurn{to{filter:brightness(1.22);box-shadow:0 0 0 1px rgba(255,239,129,.42),0 0 25px rgba(255,74,20,.9),0 0 48px rgba(255,36,10,.45)}}
+.msg-content.radio{
+max-width:min(92%,520px)!important;
+border:1px solid rgba(68,199,238,.28)!important;
+border-radius:10px!important;
+background:linear-gradient(135deg,rgba(6,57,78,.94),rgba(3,28,44,.96))!important;
+color:#bfefff!important;
+font-size:11px!important;
+font-weight:800!important;
+}
+.message-wrapper.radio{justify-content:center}
+#kick-vote-meta{font-variant-numeric:tabular-nums}
+@media(max-width:820px){
+#mobile-menu{
+position:fixed!important;
+left:8px!important;
+right:8px!important;
+top:auto!important;
+bottom:max(8px,env(safe-area-inset-bottom))!important;
+z-index:50000!important;
+width:auto!important;
+max-height:calc(100dvh - 70px)!important;
+padding:10px!important;
+grid-template-columns:1fr 1fr!important;
+gap:7px!important;
+overflow-y:auto!important;
+border-radius:16px!important;
+border:1px solid rgba(71,190,229,.44)!important;
+background:rgba(2,19,31,.985)!important;
+box-shadow:0 24px 80px rgba(0,0,0,.82),0 0 0 9999px rgba(0,5,10,.58)!important;
+backdrop-filter:blur(18px)!important;
+}
+#mobile-menu.open{display:grid!important;animation:mobileMenuIn .2s ease}
+#mobile-menu button{
+display:flex!important;align-items:center!important;justify-content:flex-start!important;
+height:48px!important;margin:0!important;padding:0 13px!important;
+border:1px solid rgba(66,167,203,.18)!important;border-radius:10px!important;
+background:rgba(7,40,59,.82)!important;color:#dff7ff!important;font-size:11px!important;font-weight:850!important;
+}
+#mobile-menu button.role-hidden{display:none!important}
+#mobile-more{display:inline-flex!important;position:relative!important;z-index:50001!important}
+#kick-vote-box{position:fixed!important;top:max(62px,env(safe-area-inset-top))!important;z-index:48000!important;width:calc(100vw - 16px)!important}
+.reply-message-btn{opacity:1!important;width:32px!important;height:30px!important}
+@keyframes mobileMenuIn{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
+}
+@media(max-width:430px){#mobile-menu{grid-template-columns:1fr!important}}
+@media(prefers-reduced-motion:reduce){.player-score.top-one,.msg-content.guess-hot{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -2522,7 +2647,7 @@ text-transform:uppercase;
 <div id="name-popup" class="modal-backdrop">
 <div class="modal-card">
 <h3>Имя в эфире</h3>
-<input id="name-input" maxlength="15" placeholder="Введите имя...">
+<input id="name-input" maxlength="30" placeholder="Введите имя...">
 <button id="name-save-btn">Сохранить</button>
 </div>
 </div>
@@ -2558,6 +2683,10 @@ text-transform:uppercase;
 <div id="admin-panel" class="sheet">
 <div class="sheet-head"><span>👑 АДМИН-ПАНЕЛЬ</span><button class="sheet-close" data-close="admin-panel" aria-label="Закрыть">×</button></div>
 <div id="admin-session-note">Защищённая сессия администратора · действия применяются сервером.</div>
+<div class="admin-toggle-row">
+<div class="admin-toggle-copy"><strong>РЕЖИМ НАБЛЮДАТЕЛЯ</strong><span>Новые игроки будут ждать окончания текущего слова.</span></div>
+<label class="admin-switch" title="Включить режим наблюдателя"><input id="admin-spectator-mode" type="checkbox"><span class="admin-switch-track"></span></label>
+</div>
 <div class="admin-field"><label>ИГРОК</label><select id="admin-player" class="admin-select"></select></div>
 <div class="admin-grid">
 <div class="admin-field"><label>СЛОВО</label><input id="admin-word" class="admin-input" placeholder="Новое слово"></div>
@@ -2596,7 +2725,17 @@ const $=id=>document.getElementById(id);
 const IS_LOCAL=['localhost','127.0.0.1'].includes(location.hostname);
 const WS_URL=IS_LOCAL?`${location.protocol==='https:'?'wss':'ws'}://${location.host}/ws`:'wss://62-109-16-64.sslip.io/ws';
 const menuScreen=$('menu-screen'),gameScreen=$('game-screen'),categoryPopup=$('category-popup'),namePopup=$('name-popup'),nameInput=$('name-input'),scoreboard=$('scoreboard'),chatBox=$('chat-box'),messages=$('messages'),input=$('message-input'),secretArea=$('secret-area'),secretWord=$('secret-word'),onAir=$('on-air'),onAirName=$('on-air-name'),categoryChip=$('category-chip'),categoryChipEmoji=$('category-chip-emoji'),categoryChipText=$('category-chip-text'),connectionDot=$('connection-dot'),connectionText=$('connection-text'),menuConnectionDot=$('menu-connection-dot'),menuConnectionText=$('menu-connection-text'),broadcastStatus=$('broadcast-status'),historyCount=$('history-count'),historyList=$('history-list'),topList=$('top-list'),mobileMenu=$('mobile-menu'),spectatorBanner=$('spectator-banner');
-let socket,myId=null,myEmoji=null,currentLeaderId=null,currentLeaderName='',currentCategory='',currentCategoryEmoji='🎲',latestPlayers=[],guessedWords=[],overlayTimer=null,reconnectTimer=null,heartbeatTimer=null,isSpectator=false,isAdmin=false,pendingReply=null;
+let socket,myId=null,myEmoji=null,myAvatarUrl='',currentLeaderId=null,currentLeaderName='',currentCategory='',currentCategoryEmoji='🎲',latestPlayers=[],guessedWords=[],overlayTimer=null,reconnectTimer=null,heartbeatTimer=null,kickVoteTimer=null,isSpectator=false,isAdmin=false,pendingReply=null,winnerOverlayUntil=0;
+function getSavedName(){try{return localStorage.getItem('radio-more-player-name')||''}catch(e){return''}}
+function savePlayerName(name){try{localStorage.setItem('radio-more-player-name',name)}catch(e){}}
+async function syncVkProfile(){
+const profile=await window.vkUserProfilePromise;
+if(!profile||!socket||socket.readyState!==WebSocket.OPEN)return;
+const vkName=[profile.first_name,profile.last_name].filter(Boolean).join(' ').trim().slice(0,30);
+const name=getSavedName()||vkName;
+const avatarUrl=profile.photo_200||profile.photo_100||'';
+if(name||avatarUrl)send({action:'set_profile',name,avatar_url:avatarUrl});
+}
 function setConnection(state,text){
 connectionDot.className=state==='green'?'online':state==='red'?'offline':'';
 connectionText.textContent=text;
@@ -2606,7 +2745,7 @@ menuConnectionText.textContent=text;
 function connect(){
 clearTimeout(reconnectTimer);clearInterval(heartbeatTimer);setConnection('yellow','Подключение к эфиру...');
 try{socket=new WebSocket(WS_URL)}catch(e){setConnection('red','Нет подключения к эфиру');reconnectTimer=setTimeout(connect,1800);return}
-socket.onopen=()=>{setConnection('green','РАДИО МОРЕ онлайн');heartbeatTimer=setInterval(()=>send({action:'ping'}),20000)};
+socket.onopen=()=>{setConnection('green','РАДИО МОРЕ онлайн');heartbeatTimer=setInterval(()=>send({action:'ping'}),20000);syncVkProfile()};
 socket.onclose=()=>{clearInterval(heartbeatTimer);setConnection('red','Нет подключения · повтор...');reconnectTimer=setTimeout(connect,1800)};
 socket.onerror=()=>setConnection('red','Ошибка соединения');
 socket.onmessage=e=>{try{handleServer(JSON.parse(e.data))}catch(err){console.error(err,e.data)}};
@@ -2619,7 +2758,7 @@ $('mechanic-title').textContent=title;$('mechanic-subtitle').textContent=subtitl
 overlay.classList.toggle('celebration',variant==='celebration');overlay.classList.add('show');
 clearTimeout(overlayTimer);overlayTimer=setTimeout(()=>overlay.classList.remove('show','celebration'),2400);
 }
-function showWinner(data){showOverlay('УГАДАНО!',`${data.winner_name} · ${data.word}`,data.winner_emoji||'🏆','celebration')}
+function showWinner(data){const combo=data.combo>1?`\nКОМБО ЭФИРА ×${data.combo}`:'';winnerOverlayUntil=Date.now()+2300;showOverlay('УГАДАНО!',`${data.winner_name} · ${data.word}${combo}`,data.winner_emoji||'🏆','celebration')}
 function animateAirSwitch(){gameScreen.classList.remove('air-switch');requestAnimationFrame(()=>{gameScreen.classList.add('air-switch');setTimeout(()=>gameScreen.classList.remove('air-switch'),760)})}
 const REACTION_EMOJIS=['🌊','⚓','🐊','🔥','👑','🎙️','😄','😂'];
 function launchReaction(text){
@@ -2658,8 +2797,11 @@ scoreboard.innerHTML='';
 const sorted=[...latestPlayers].sort((a,b)=>b.score-a.score||String(a.name).localeCompare(String(b.name),'ru'));
 sorted.forEach((p,i)=>{
 const el=document.createElement('div');
-el.className='player-score'+(p.id===currentLeaderId?' leader':'')+(p.spectator?' spectator':'')+(i===0?' top-one':'');
-el.textContent=`${p.spectator?'👁 ':''}${p.name} · ${p.score}`;
+el.className='player-score'+(p.id===currentLeaderId?' leader':'')+(p.spectator?' spectator':'')+(i===0&&p.score>0?' top-one':'');
+const avatarEl=document.createElement('span');avatarEl.className='player-avatar';
+if(p.avatar_url){const img=document.createElement('img');img.src=p.avatar_url;img.alt='';img.referrerPolicy='no-referrer';avatarEl.appendChild(img)}else avatarEl.textContent=p.emoji||'👤';
+const label=document.createElement('span');label.textContent=`${p.spectator?'👁 ':''}${p.name} · ${p.score}`;
+el.append(avatarEl,label);
 if(p.id===myId)el.style.outline='1px solid rgba(255,255,255,.45)';
 scoreboard.appendChild(el);
 });
@@ -2668,19 +2810,19 @@ refreshAdminPlayers();
 }
 function clearReply(){pendingReply=null;$('reply-bar').classList.remove('open');$('reply-name').textContent='';$('reply-preview').textContent=''}
 function beginReply(messageId,name,text){pendingReply={messageId,name,text};$('reply-name').textContent=`Ответ: ${name}`;$('reply-preview').textContent=text;$('reply-bar').classList.add('open');input.focus()}
-function addMessage(text,type='other',avatar=null,name=null,messageId=null,proximity=null,replyTo=null){
+function addMessage(text,type='other',avatar=null,name=null,messageId=null,proximity=null,replyTo=null,avatarUrl='',playerId=null){
 const wrap=document.createElement('div');
 wrap.className=`message-wrapper ${type}`;
 if(type==='other'||type==='self'){
 const topPlayer=[...latestPlayers].sort((a,b)=>b.score-a.score||String(a.name).localeCompare(String(b.name),'ru'))[0];
-const msgPlayer=latestPlayers.find(p=>p.name===name);
+const msgPlayer=latestPlayers.find(p=>p.id===playerId)||latestPlayers.find(p=>p.name===name);
 if(topPlayer&&msgPlayer&&topPlayer.id===msgPlayer.id)wrap.classList.add('top-player');
 }
 if(messageId)wrap.dataset.messageId=messageId;
-if(type==='other'&&avatar){
+if(type==='other'&&(avatar||avatarUrl)){
 const av=document.createElement('div');
 av.className='msg-avatar';
-av.textContent=avatar;
+if(avatarUrl){const img=document.createElement('img');img.src=avatarUrl;img.alt='';img.referrerPolicy='no-referrer';av.appendChild(img)}else av.textContent=avatar;
 wrap.appendChild(av);
 }
 const normalChat=type==='other'||type==='self';
@@ -2734,7 +2876,10 @@ const medals=['🥇','🥈','🥉'];
 players.slice(0,20).forEach((p,i)=>{
 const row=document.createElement('div');
 row.className='top-row'+(i===0?' top-one':'');
-row.innerHTML=`<span>${medals[i]||`${i+1}.`} ${escapeHtml(p.name)}${p.spectator?' · 👁':''}</span><strong>${p.score}</strong>`;
+const identity=document.createElement('span');identity.className='top-identity';
+const avatar=document.createElement('span');avatar.className='top-avatar';if(p.avatar_url){const img=document.createElement('img');img.src=p.avatar_url;img.alt='';img.referrerPolicy='no-referrer';avatar.appendChild(img)}else avatar.textContent=p.emoji||'👤';
+const name=document.createElement('span');name.textContent=`${medals[i]||`${i+1}.`} ${p.name}${p.spectator?' · 👁':''}`;
+identity.append(avatar,name);const score=document.createElement('strong');score.textContent=p.score;row.append(identity,score);
 topList.appendChild(row);
 });
 $('top-sheet').classList.add('open');
@@ -2757,16 +2902,23 @@ setTimeout(()=>$('admin-password').focus(),80);
 }
 function adminToast(text){const el=$('admin-toast');el.textContent=text;el.style.display='block';setTimeout(()=>el.style.display='none',1600)}
 function openVoteStart(){const box=$('vote-start-list');box.innerHTML='';const others=latestPlayers.filter(p=>p.id!==myId);if(!others.length){box.innerHTML='<div class="history-row"><span>Некого кикать</span></div>'}else others.forEach(p=>{const row=document.createElement('div');row.className='vote-player';const name=document.createElement('span');name.textContent=`${p.emoji||''} ${p.name}`;const b=document.createElement('button');b.textContent='Голосовать за кик';b.onclick=()=>{const reason=prompt('Причина голосования (можно пусто):')??'';send({action:'start_kick_vote',target_id:p.id,reason});$('vote-start-sheet').classList.remove('open')};row.append(name,b);box.appendChild(row)});$('vote-start-sheet').classList.add('open')}
-function renderKickVote(data){$('kick-vote-box').style.display='block';$('kick-vote-title').textContent=`⚖ Кикнуть ${data.target_name}?`;$('kick-vote-meta').textContent=`${data.reason?data.reason+' · ':''}ЗА ${data.yes} · ПРОТИВ ${data.no} · нужно ${data.needed} из ${data.eligible}`}
+function closeKickVote(message=''){clearInterval(kickVoteTimer);kickVoteTimer=null;$('kick-vote-box').style.display='none';if(message)addSystem(`⚖ ${message}`)}
+function renderKickVote(data){
+clearInterval(kickVoteTimer);$('kick-vote-box').style.display='block';$('kick-vote-title').textContent=`⚖ Кикнуть ${data.target_name}?`;
+const deadline=Date.now()+Math.max(0,data.expires_in||0)*1000;
+const update=()=>{const seconds=Math.max(0,Math.ceil((deadline-Date.now())/1000));$('kick-vote-meta').textContent=`${data.reason?data.reason+' · ':''}ЗА ${data.yes} · ПРОТИВ ${data.no} · нужно ${data.needed} из ${data.eligible} · ${seconds} сек.`;if(seconds<=0)closeKickVote()};
+update();kickVoteTimer=setInterval(update,1000);
+}
 function handleServer(data){
 if(data.type==='pong')return;
-if(data.type==='my_info'){myId=data.id;myEmoji=data.emoji;setSpectator(data.spectator,true);updateRoleControls();addSystem(`Вы подключились · ID ${myId}`);if(data.name)nameInput.placeholder=data.name}
+if(data.type==='my_info'){myId=data.id;myEmoji=data.emoji;myAvatarUrl=data.avatar_url||'';setSpectator(data.spectator,true);updateRoleControls();addSystem(`Вы подключились · ID ${myId}`);if(data.name)nameInput.placeholder=data.name}
 else if(data.type==='game_state'){currentLeaderId=data.leader_id;currentLeaderName=data.leader_name||'';updateCategory(data.category,data.category_emoji);setSpectator(data.spectator,true);updateOnAir();startGameUI()}
-else if(data.type==='chat'){addMessage(data.message,data.player_id===myId?'self':'other',data.emoji,data.name,data.message_id,data.proximity,data.reply_to);launchReaction(data.message)}
+else if(data.type==='chat'){addMessage(data.message,data.player_id===myId?'self':'other',data.emoji,data.name,data.message_id,data.proximity,data.reply_to,data.avatar_url,data.player_id);launchReaction(data.message)}
 else if(data.type==='system'){addSystem(data.message)}
+else if(data.type==='radio_message'){addMessage(data.message,'radio')}
 else if(data.type==='game_start'){currentLeaderId=data.leader_id;currentLeaderName=data.leader_name||'';updateCategory(data.category,data.category_emoji);updateOnAir();updateScoreboard(latestPlayers);startGameUI();animateAirSwitch();secretArea.style.display=currentLeaderId===myId?'flex':'none'}
-else if(data.type==='leader_changed'){currentLeaderId=data.leader_id;currentLeaderName=data.name||'';updateOnAir();updateScoreboard(latestPlayers);animateAirSwitch();secretArea.style.display=currentLeaderId===myId?'flex':'none';showOverlay('НОВЫЙ ВЕДУЩИЙ',data.name,data.emoji||'🎙')}
-else if(data.type==='category_changed'){updateCategory(data.category,data.emoji);showOverlay('КАТЕГОРИЯ',data.category,data.emoji)}
+else if(data.type==='leader_changed'){currentLeaderId=data.leader_id;currentLeaderName=data.name||'';updateOnAir();updateScoreboard(latestPlayers);animateAirSwitch();secretArea.style.display=currentLeaderId===myId?'flex':'none';if(Date.now()>winnerOverlayUntil)showOverlay('НОВЫЙ ВЕДУЩИЙ',data.name,data.emoji||'🎙')}
+else if(data.type==='category_changed'){updateCategory(data.category,data.emoji);if(Date.now()>winnerOverlayUntil)showOverlay('НОВАЯ ТЕМА',data.category,data.emoji)}
 else if(data.type==='your_word'){secretArea.style.display='flex';secretWord.textContent=data.word;requestAnimationFrame(fitSecretWord)}
 else if(data.type==='player_list'){updateScoreboard(data.players)}
 else if(data.type==='history'){guessedWords=data.words||[];renderHistory()}
@@ -2774,17 +2926,18 @@ else if(data.type==='word_guessed'){addMessage(`🎉 ${data.message}`,'guessed-a
 else if(data.type==='spectators_promoted'){if((data.player_ids||[]).includes(myId))setSpectator(false,true)}
 else if(data.type==='spectator_notice'){showOverlay('НАБЛЮДАТЕЛЬ',data.message,'👁')}
 else if(data.type==='word_skipped'){addSystem('Ведущий сменил слово')}
-else if(data.type==='top_leader_changed'){showOverlay('НОВЫЙ ЛИДЕР',`${data.name} · ${data.score}`,data.emoji||'🏆')}
+else if(data.type==='top_leader_changed'){if(Date.now()>winnerOverlayUntil)showOverlay('НОВЫЙ ЛИДЕР',`${data.name} · ${data.score}`,data.emoji||'🏆')}
 else if(data.type==='leaderboard'){renderTop(data.players)}
 else if(data.type==='message_heat'){applyHeat(data.message_id,data.level)}
-else if(data.type==='game_reset'){currentLeaderId=null;currentLeaderName='';secretArea.style.display='none';setSpectator(false,false);updateOnAir();updateCategory('');showOverlay('НОВАЯ ИГРА','Счёт сброшен','↻')}
+else if(data.type==='game_reset'){closeKickVote();currentLeaderId=null;currentLeaderName='';secretArea.style.display='none';setSpectator(false,false);updateOnAir();updateCategory('');showOverlay('НОВАЯ ИГРА','Счёт сброшен','↻')}
 else if(data.type==='leader_left'||data.type==='round_stopped'){currentLeaderId=null;currentLeaderName='';secretArea.style.display='none';setSpectator(false,false);updateOnAir();showOverlay('НУЖЕН ВЕДУЩИЙ','Забирайте эфир','🎙')}
 else if(data.type==='kick_vote_state'){renderKickVote(data)}
-else if(data.type==='kick_vote_closed'){$('kick-vote-box').style.display='none'}
+else if(data.type==='kick_vote_closed'){closeKickVote(data.message||'')}
 else if(data.type==='kicked'){alert(`Вы удалены из игры${data.reason?`: ${data.reason}`:''}`);try{socket.close()}catch(e){}}
 else if(data.type==='admin_auth'){if(data.ok){isAdmin=true;$('admin-login-popup').style.display='none';$('admin-password').value='';send({action:'admin_get_state'});$('admin-panel').classList.add('open');adminToast('Вход выполнен')}else $('admin-login-error').textContent=data.message||'Неверный пароль'}
-else if(data.type==='admin_state'){latestPlayers=data.players||latestPlayers;refreshAdminPlayers();$('admin-word').value=data.current_word||''}
+else if(data.type==='admin_state'){latestPlayers=data.players||latestPlayers;refreshAdminPlayers();$('admin-word').value=data.current_word||'';$('admin-spectator-mode').checked=!!data.spectator_mode_enabled}
 else if(data.type==='admin_ok'){adminToast('Готово');send({action:'admin_get_state'})}
+else if(data.type==='spectator_mode_changed'){addSystem(`Режим наблюдателя ${data.enabled?'включён':'выключен'} администратором`)}
 else if(data.type==='admin_word_changed'){if(currentLeaderId===myId)addSystem('Администратор изменил текущее слово')}
 else if(data.type==='error'){addSystem(`Ошибка: ${data.message}`,'error')}
 }
@@ -2800,7 +2953,7 @@ $('menu-rules-btn').onclick=()=>$('rules-popup').style.display='flex';
 $('menu-developers-btn').onclick=()=>$('developers-popup').style.display='flex';
 document.querySelectorAll('[data-modal-close]').forEach(btn=>btn.onclick=()=>$(btn.dataset.modalClose).style.display='none');
 $('mobile-more').onclick=e=>{e.stopPropagation();mobileMenu.classList.toggle('open')};document.addEventListener('click',e=>{if(!mobileMenu.contains(e.target)&&e.target!==$('mobile-more'))mobileMenu.classList.remove('open')});
-$('name-btn').onclick=()=>namePopup.style.display='flex';$('name-save-btn').onclick=()=>{const name=nameInput.value.trim();if(!name)return;send({action:'set_name',name});namePopup.style.display='none';nameInput.value=''};
+$('name-btn').onclick=()=>namePopup.style.display='flex';$('name-save-btn').onclick=()=>{const name=nameInput.value.trim();if(!name)return;savePlayerName(name);send({action:'set_name',name});namePopup.style.display='none';nameInput.value=''};
 $('history-btn').onclick=()=>{renderHistory();$('history-sheet').classList.add('open')};document.querySelectorAll('.sheet-close').forEach(btn=>btn.onclick=()=>$(btn.dataset.close).classList.remove('open'));
 $('reply-cancel').onclick=clearReply;
 $('emoji-btn').onclick=()=>$('emoji-row').classList.toggle('open');REACTION_EMOJIS.forEach(emoji=>{const el=document.createElement('span');el.className='emoji-item';el.textContent=emoji;el.onclick=()=>{send({action:'guess',word:emoji,reply_to:pendingReply?.messageId||null});clearReply();$('emoji-row').classList.remove('open')};$('emoji-row').appendChild(el)});
@@ -2809,6 +2962,7 @@ $('send-btn').onclick=sendCurrent;input.addEventListener('keydown',e=>{if(e.key=
 input.addEventListener('keydown',e=>{if(e.key==='Escape'&&pendingReply){e.preventDefault();clearReply()}});
 $('vote-yes').onclick=()=>send({action:'vote_kick',vote:'yes'});$('vote-no').onclick=()=>send({action:'vote_kick',vote:'no'});
 $('admin-login-submit').onclick=()=>send({action:'admin_login',password:$('admin-password').value});$('admin-password').addEventListener('keydown',e=>{if(e.key==='Enter')$('admin-login-submit').click()});
+$('admin-spectator-mode').onchange=e=>send({action:'admin_set_spectator_mode',enabled:e.target.checked});
 $('admin-set-word').onclick=()=>send({action:'admin_set_word',word:$('admin-word').value});$('admin-set-leader').onclick=()=>send({action:'admin_set_leader',target_id:Number($('admin-player').value)});$('admin-say-as').onclick=()=>send({action:'admin_say_as',target_id:Number($('admin-player').value),message:$('admin-message').value});$('admin-emoji-as').onclick=()=>send({action:'admin_emoji_as',target_id:Number($('admin-player').value),emoji:$('admin-emoji').value});$('admin-kick').onclick=()=>{const id=Number($('admin-player').value);if(!id)return;if(confirm('Точно кикнуть этого игрока?'))send({action:'admin_kick',target_id:id,reason:$('admin-kick-reason').value})};
 [categoryPopup,namePopup,$('admin-login-popup'),$('rules-popup'),$('developers-popup')].forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.style.display='none'}));
 updateRoleControls();
