@@ -1273,6 +1273,7 @@ letter-spacing:.025em;
 }
 #admin-set-word::before{content:"🔐 ";opacity:.8}
 #admin-set-leader::before{content:"🎙 ";opacity:.8}
+#admin-award-guess::before{content:"✓ ";opacity:.8}
 #admin-say-as::before{content:"💬 ";opacity:.8}
 #admin-emoji-as::before{content:"😄 ";opacity:.8}
 #admin-kick{
@@ -1611,7 +1612,7 @@ border-color:rgba(255,210,31,.55)!important;
 #admin-panel .sheet-head{
 color:#ffd857!important;
 }
-#admin-set-word,#admin-set-leader,#admin-say-as,#admin-emoji-as{
+#admin-set-word,#admin-set-leader,#admin-award-guess,#admin-say-as,#admin-emoji-as{
 background:#061c2c!important;
 border-color:rgba(20,117,156,.46)!important;
 }
@@ -2733,6 +2734,7 @@ font-size:10px;font-weight:850;white-space:nowrap;box-shadow:inset 0 1px rgba(25
 <div class="admin-grid">
 <button id="admin-set-word" class="admin-action">Сменить слово</button>
 <button id="admin-set-leader" class="admin-action">Сделать ведущим</button>
+<button id="admin-award-guess" class="admin-action">Засчитать отгадку</button>
 <button id="admin-say-as" class="admin-action">Написать от игрока</button>
 <button id="admin-emoji-as" class="admin-action">Отправить эмодзи</button>
 </div>
@@ -2767,10 +2769,13 @@ let vkProfile=null;
 function getSavedName(){try{return localStorage.getItem('radio-more-player-name')||''}catch(e){return''}}
 function savePlayerName(name){try{localStorage.setItem('radio-more-player-name',name)}catch(e){}}
 function clearSavedName(){try{localStorage.removeItem('radio-more-player-name')}catch(e){}}
+function cacheVkProfile(profile){try{localStorage.setItem('radio-more-vk-profile',JSON.stringify({first_name:profile.first_name||'',last_name:profile.last_name||'',photo_200:profile.photo_200||'',photo_100:profile.photo_100||''}))}catch(e){}}
+function getCachedVkProfile(){try{return JSON.parse(localStorage.getItem('radio-more-vk-profile')||'null')}catch(e){return null}}
 async function syncVkProfile(){
 const profile=await window.vkUserProfilePromise;
 if(!profile||!socket||socket.readyState!==WebSocket.OPEN)return;
 vkProfile=profile;
+cacheVkProfile(profile);
 const vkName=[profile.first_name,profile.last_name].filter(Boolean).join(' ').trim().slice(0,30);
 const name=getSavedName()||vkName;
 const avatarUrl=profile.photo_200||profile.photo_100||'';
@@ -3000,7 +3005,7 @@ $('menu-developers-btn').onclick=()=>$('developers-popup').style.display='flex';
 document.querySelectorAll('[data-modal-close]').forEach(btn=>btn.onclick=()=>$(btn.dataset.modalClose).style.display='none');
 $('mobile-more').onclick=e=>{e.stopPropagation();mobileMenu.classList.toggle('open')};document.addEventListener('click',e=>{if(!mobileMenu.contains(e.target)&&e.target!==$('mobile-more'))mobileMenu.classList.remove('open')});
 $('name-btn').onclick=()=>namePopup.style.display='flex';$('name-save-btn').onclick=()=>{const name=nameInput.value.trim();if(!name)return;savePlayerName(name);send({action:'set_name',name});namePopup.style.display='none';nameInput.value=''};
-$('name-vk-btn').onclick=async()=>{const profile=vkProfile||await window.vkUserProfilePromise;if(!profile){showOverlay('VK НЕДОСТУПЕН','Откройте игру внутри VK','VK');return}vkProfile=profile;const name=[profile.first_name,profile.last_name].filter(Boolean).join(' ').trim().slice(0,30);const avatarUrl=profile.photo_200||profile.photo_100||'';if(!name)return;clearSavedName();send({action:'set_profile',name,avatar_url:avatarUrl});namePopup.style.display='none';nameInput.value='';showOverlay('ИМЯ ВОССТАНОВЛЕНО',name,'VK')};
+$('name-vk-btn').onclick=async()=>{const profile=vkProfile||getCachedVkProfile()||await window.vkUserProfilePromise;if(!profile){showOverlay('VK НЕДОСТУПЕН','Откройте игру внутри VK','VK');return}vkProfile=profile;cacheVkProfile(profile);const name=[profile.first_name,profile.last_name].filter(Boolean).join(' ').trim().slice(0,30);const avatarUrl=profile.photo_200||profile.photo_100||'';if(!name){showOverlay('ИМЯ НЕ НАЙДЕНО','VK не передал имя профиля','VK');return}clearSavedName();send({action:'set_profile',name,avatar_url:avatarUrl});namePopup.style.display='none';nameInput.value='';showOverlay('ИМЯ ВОССТАНОВЛЕНО',name,'VK')};
 $('history-btn').onclick=()=>{renderHistory();$('history-sheet').classList.add('open')};document.querySelectorAll('.sheet-close').forEach(btn=>btn.onclick=()=>$(btn.dataset.close).classList.remove('open'));
 $('reply-cancel').onclick=clearReply;
 $('emoji-btn').onclick=()=>$('emoji-row').classList.toggle('open');REACTION_EMOJIS.forEach(emoji=>{const el=document.createElement('span');el.className='emoji-item';el.textContent=emoji;el.onclick=()=>{send({action:'guess',word:emoji,reply_to:pendingReply?.messageId||null});clearReply();$('emoji-row').classList.remove('open')};$('emoji-row').appendChild(el)});
@@ -3010,7 +3015,7 @@ input.addEventListener('keydown',e=>{if(e.key==='Escape'&&pendingReply){e.preven
 $('vote-yes').onclick=()=>send({action:'vote_kick',vote:'yes'});$('vote-no').onclick=()=>send({action:'vote_kick',vote:'no'});
 $('admin-login-submit').onclick=()=>send({action:'admin_login',password:$('admin-password').value});$('admin-password').addEventListener('keydown',e=>{if(e.key==='Enter')$('admin-login-submit').click()});
 $('admin-spectator-mode').onchange=e=>send({action:'admin_set_spectator_mode',enabled:e.target.checked});
-$('admin-set-word').onclick=()=>send({action:'admin_set_word',word:$('admin-word').value});$('admin-set-leader').onclick=()=>send({action:'admin_set_leader',target_id:Number($('admin-player').value)});$('admin-say-as').onclick=()=>send({action:'admin_say_as',target_id:Number($('admin-player').value),message:$('admin-message').value});$('admin-emoji-as').onclick=()=>send({action:'admin_emoji_as',target_id:Number($('admin-player').value),emoji:$('admin-emoji').value});$('admin-kick').onclick=()=>{const id=Number($('admin-player').value);if(!id)return;if(confirm('Точно кикнуть этого игрока?'))send({action:'admin_kick',target_id:id,reason:$('admin-kick-reason').value})};
+$('admin-set-word').onclick=()=>send({action:'admin_set_word',word:$('admin-word').value});$('admin-set-leader').onclick=()=>send({action:'admin_set_leader',target_id:Number($('admin-player').value)});$('admin-award-guess').onclick=()=>send({action:'admin_award_guess',target_id:Number($('admin-player').value)});$('admin-say-as').onclick=()=>send({action:'admin_say_as',target_id:Number($('admin-player').value),message:$('admin-message').value});$('admin-emoji-as').onclick=()=>send({action:'admin_emoji_as',target_id:Number($('admin-player').value),emoji:$('admin-emoji').value});$('admin-kick').onclick=()=>{const id=Number($('admin-player').value);if(!id)return;if(confirm('Точно кикнуть этого игрока?'))send({action:'admin_kick',target_id:id,reason:$('admin-kick-reason').value})};
 [categoryPopup,namePopup,$('admin-login-popup'),$('rules-popup'),$('developers-popup')].forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.style.display='none'}));
 updateRoleControls();
 </script>

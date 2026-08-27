@@ -774,6 +774,25 @@ async def websocket_endpoint(websocket: WebSocket):
                     await websocket.send_json({"type":"admin_ok","action":"set_leader"})
                     continue
 
+                if action == "admin_award_guess":
+                    target_id = data.get("target_id")
+                    target_ws, target = room.get_player_by_id(target_id)
+                    if not target:
+                        await websocket.send_json({"type":"error","message":"Игрок не найден."})
+                        continue
+                    if not room.is_active or not room.current_word:
+                        await websocket.send_json({"type":"error","message":"Сейчас нет активного слова."})
+                        continue
+                    if target["id"] == room.leader_id:
+                        await websocket.send_json({"type":"error","message":"Нельзя засчитать слово текущему ведущему."})
+                        continue
+                    if target.get("spectator"):
+                        await websocket.send_json({"type":"error","message":"Наблюдателю нельзя засчитать слово."})
+                        continue
+                    await room.word_guessed(target_ws)
+                    await websocket.send_json({"type":"admin_ok","action":"award_guess"})
+                    continue
+
                 if action == "admin_say_as":
                     target_id = data.get("target_id")
                     text = text_value(data, "message", 500)
