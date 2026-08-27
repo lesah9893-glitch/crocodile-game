@@ -2414,6 +2414,11 @@ text-transform:uppercase;
 #game-meta{min-height:40px!important;padding:4px 8px!important}
 .player-score,#history-btn,#name-btn{height:30px!important}
 }
+#name-vk-btn{
+width:100%;height:42px;margin-top:8px;border:1px solid rgba(76,180,255,.38);border-radius:13px;
+background:rgba(25,92,148,.24);color:#dff4ff;font-size:11px;font-weight:850;cursor:pointer;
+}
+#name-vk-btn:active{transform:scale(.98);background:rgba(25,92,148,.4)}
 
 /* ===== V5 SOCIAL + MOBILE + GAME FEEDBACK ===== */
 .msg-stack{position:relative!important}
@@ -2527,6 +2532,29 @@ background:rgba(7,40,59,.82)!important;color:#dff7ff!important;font-size:11px!im
 @media(max-width:430px){#mobile-menu{grid-template-columns:1fr!important}}
 @media(prefers-reduced-motion:reduce){.player-score.top-one,.msg-content.guess-hot{animation:none!important}}
 
+/* ===== MOBILE QUICK ACTIONS ===== */
+#mobile-quick-actions{display:none}
+@media(max-width:820px){
+#mobile-more{display:none!important}
+#mobile-quick-actions{
+display:flex;flex:0 0 auto;align-items:center;gap:6px;width:100%;min-height:48px;
+padding:5px 7px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
+border-bottom:1px solid rgba(33,181,226,.2);background:rgba(1,14,24,.94);
+}
+#mobile-quick-actions::-webkit-scrollbar{display:none}
+#mobile-quick-actions button{
+display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;gap:5px;
+min-width:82px;height:37px;padding:0 10px;border:1px solid rgba(52,180,220,.3);border-radius:10px;
+background:linear-gradient(145deg,rgba(8,49,75,.96),rgba(3,29,48,.96));color:#e5f9ff;
+font-size:10px;font-weight:850;white-space:nowrap;box-shadow:inset 0 1px rgba(255,255,255,.05);
+}
+#mobile-quick-actions button:active{transform:scale(.97);background:rgba(9,66,96,.98)}
+#quick-lead{border-color:rgba(33,213,247,.5)!important;color:#adf5ff!important}
+#quick-skip,#quick-restart{border-color:rgba(255,202,55,.42)!important;color:#ffe694!important}
+#quick-admin{border-color:rgba(255,202,55,.3)!important;color:#ffdf73!important}
+#mobile-quick-actions button.role-hidden{display:none!important}
+}
+
 </style>
 </head>
 <body>
@@ -2611,6 +2639,14 @@ background:rgba(7,40,59,.82)!important;color:#dff7ff!important;font-size:11px!im
 <button id="history-btn">✓ <span id="history-count">0</span></button>
 <button id="name-btn" title="Изменить имя" aria-label="Изменить имя">✎</button>
 </div>
+<div id="mobile-quick-actions" aria-label="Игровые действия">
+<button id="quick-lead">🎙 Ведущий</button>
+<button id="quick-skip">⏭ Слово</button>
+<button id="quick-restart">↻ Новая</button>
+<button id="quick-top">🏆 Топ</button>
+<button id="quick-vote">👥 Кик</button>
+<button id="quick-admin">👑 Админ</button>
+</div>
 
 <div id="chat-box"><div id="messages"></div></div>
 
@@ -2649,6 +2685,7 @@ background:rgba(7,40,59,.82)!important;color:#dff7ff!important;font-size:11px!im
 <h3>Имя в эфире</h3>
 <input id="name-input" maxlength="30" placeholder="Введите имя...">
 <button id="name-save-btn">Сохранить</button>
+<button id="name-vk-btn">↻ Вернуть имя и фото из VK</button>
 </div>
 </div>
 
@@ -2726,11 +2763,14 @@ const IS_LOCAL=['localhost','127.0.0.1'].includes(location.hostname);
 const WS_URL=IS_LOCAL?`${location.protocol==='https:'?'wss':'ws'}://${location.host}/ws`:'wss://62-109-16-64.sslip.io/ws';
 const menuScreen=$('menu-screen'),gameScreen=$('game-screen'),categoryPopup=$('category-popup'),namePopup=$('name-popup'),nameInput=$('name-input'),scoreboard=$('scoreboard'),chatBox=$('chat-box'),messages=$('messages'),input=$('message-input'),secretArea=$('secret-area'),secretWord=$('secret-word'),onAir=$('on-air'),onAirName=$('on-air-name'),categoryChip=$('category-chip'),categoryChipEmoji=$('category-chip-emoji'),categoryChipText=$('category-chip-text'),connectionDot=$('connection-dot'),connectionText=$('connection-text'),menuConnectionDot=$('menu-connection-dot'),menuConnectionText=$('menu-connection-text'),broadcastStatus=$('broadcast-status'),historyCount=$('history-count'),historyList=$('history-list'),topList=$('top-list'),mobileMenu=$('mobile-menu'),spectatorBanner=$('spectator-banner');
 let socket,myId=null,myEmoji=null,myAvatarUrl='',currentLeaderId=null,currentLeaderName='',currentCategory='',currentCategoryEmoji='🎲',latestPlayers=[],guessedWords=[],overlayTimer=null,reconnectTimer=null,heartbeatTimer=null,kickVoteTimer=null,isSpectator=false,isAdmin=false,pendingReply=null,winnerOverlayUntil=0;
+let vkProfile=null;
 function getSavedName(){try{return localStorage.getItem('radio-more-player-name')||''}catch(e){return''}}
 function savePlayerName(name){try{localStorage.setItem('radio-more-player-name',name)}catch(e){}}
+function clearSavedName(){try{localStorage.removeItem('radio-more-player-name')}catch(e){}}
 async function syncVkProfile(){
 const profile=await window.vkUserProfilePromise;
 if(!profile||!socket||socket.readyState!==WebSocket.OPEN)return;
+vkProfile=profile;
 const vkName=[profile.first_name,profile.last_name].filter(Boolean).join(' ').trim().slice(0,30);
 const name=getSavedName()||vkName;
 const avatarUrl=profile.photo_200||profile.photo_100||'';
@@ -2779,8 +2819,8 @@ function updateBroadcastStatus(){const count=latestPlayers.length;const watchers
 function updateRoleControls(){
 const hasLeader=currentLeaderId!==null&&currentLeaderId!==undefined;
 const amLeader=hasLeader&&currentLeaderId===myId;
-[$('menu-lead-btn'),$('become-leader-btn'),$('mobile-lead')].forEach(el=>el.classList.toggle('role-hidden',hasLeader));
-[$('restart-btn'),$('skip-btn'),$('mobile-restart'),$('mobile-skip')].forEach(el=>el.classList.toggle('role-hidden',!amLeader));
+[$('menu-lead-btn'),$('become-leader-btn'),$('mobile-lead'),$('quick-lead')].forEach(el=>el.classList.toggle('role-hidden',hasLeader));
+[$('restart-btn'),$('skip-btn'),$('mobile-restart'),$('mobile-skip'),$('quick-restart'),$('quick-skip')].forEach(el=>el.classList.toggle('role-hidden',!amLeader));
 }
 function updateOnAir(){if(currentLeaderId&&currentLeaderName){onAir.style.display='flex';onAirName.textContent=`В ЭФИРЕ · ${currentLeaderName}`}else onAir.style.display='none';updateBroadcastStatus();updateRoleControls()}
 function updateCategory(name,emoji='🎲'){currentCategory=name||'';currentCategoryEmoji=emoji||'🎲';if(currentCategory){categoryChip.style.display='flex';categoryChipEmoji.textContent=currentCategoryEmoji;categoryChipText.textContent=currentCategory}else categoryChip.style.display='none'}
@@ -2943,17 +2983,24 @@ else if(data.type==='error'){addSystem(`Ошибка: ${data.message}`,'error')}
 }
 $('menu-start-btn').onclick=()=>{if(isSpectator){showOverlay('НАБЛЮДАТЕЛЬ','Дождитесь текущей отгадки','👁');return}showCategoryPicker(category=>send({action:'start_game',category}))};
 $('menu-lead-btn').onclick=requestLead;$('become-leader-btn').onclick=requestLead;$('mobile-lead').onclick=()=>{mobileMenu.classList.remove('open');requestLead()};
+$('quick-lead').onclick=requestLead;
 $('back-btn').onclick=()=>{gameScreen.style.display='none';menuScreen.style.display='flex'};
 $('top-btn').onclick=requestTop;$('mobile-top').onclick=()=>{mobileMenu.classList.remove('open');requestTop()};
+$('quick-top').onclick=requestTop;
 $('restart-btn').onclick=()=>send({action:'restart_game'});$('mobile-restart').onclick=()=>{mobileMenu.classList.remove('open');send({action:'restart_game'})};
+$('quick-restart').onclick=()=>send({action:'restart_game'});
 $('skip-btn').onclick=()=>send({action:'skip_word'});$('mobile-skip').onclick=()=>{mobileMenu.classList.remove('open');send({action:'skip_word'})};
+$('quick-skip').onclick=()=>send({action:'skip_word'});
 $('vote-btn').onclick=openVoteStart;$('mobile-vote').onclick=()=>{mobileMenu.classList.remove('open');openVoteStart()};
+$('quick-vote').onclick=openVoteStart;
 $('admin-btn').onclick=openAdmin;$('menu-admin-btn').onclick=openAdmin;$('mobile-admin').onclick=()=>{mobileMenu.classList.remove('open');openAdmin()};
+$('quick-admin').onclick=openAdmin;
 $('menu-rules-btn').onclick=()=>$('rules-popup').style.display='flex';
 $('menu-developers-btn').onclick=()=>$('developers-popup').style.display='flex';
 document.querySelectorAll('[data-modal-close]').forEach(btn=>btn.onclick=()=>$(btn.dataset.modalClose).style.display='none');
 $('mobile-more').onclick=e=>{e.stopPropagation();mobileMenu.classList.toggle('open')};document.addEventListener('click',e=>{if(!mobileMenu.contains(e.target)&&e.target!==$('mobile-more'))mobileMenu.classList.remove('open')});
 $('name-btn').onclick=()=>namePopup.style.display='flex';$('name-save-btn').onclick=()=>{const name=nameInput.value.trim();if(!name)return;savePlayerName(name);send({action:'set_name',name});namePopup.style.display='none';nameInput.value=''};
+$('name-vk-btn').onclick=async()=>{const profile=vkProfile||await window.vkUserProfilePromise;if(!profile){showOverlay('VK НЕДОСТУПЕН','Откройте игру внутри VK','VK');return}vkProfile=profile;const name=[profile.first_name,profile.last_name].filter(Boolean).join(' ').trim().slice(0,30);const avatarUrl=profile.photo_200||profile.photo_100||'';if(!name)return;clearSavedName();send({action:'set_profile',name,avatar_url:avatarUrl});namePopup.style.display='none';nameInput.value='';showOverlay('ИМЯ ВОССТАНОВЛЕНО',name,'VK')};
 $('history-btn').onclick=()=>{renderHistory();$('history-sheet').classList.add('open')};document.querySelectorAll('.sheet-close').forEach(btn=>btn.onclick=()=>$(btn.dataset.close).classList.remove('open'));
 $('reply-cancel').onclick=clearReply;
 $('emoji-btn').onclick=()=>$('emoji-row').classList.toggle('open');REACTION_EMOJIS.forEach(emoji=>{const el=document.createElement('span');el.className='emoji-item';el.textContent=emoji;el.onclick=()=>{send({action:'guess',word:emoji,reply_to:pendingReply?.messageId||null});clearReply();$('emoji-row').classList.remove('open')};$('emoji-row').appendChild(el)});
