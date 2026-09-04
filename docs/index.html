@@ -2762,7 +2762,9 @@ font-size:10px;font-weight:850;white-space:nowrap;box-shadow:inset 0 1px rgba(25
 <script>
 const $=id=>document.getElementById(id);
 const IS_LOCAL=['localhost','127.0.0.1'].includes(location.hostname);
-const WS_URL=IS_LOCAL?`${location.protocol==='https:'?'wss':'ws'}://${location.host}/ws`:'wss://62-109-16-64.sslip.io/ws';
+const VK_LAUNCH_USER_ID=new URLSearchParams(location.search).get('vk_user_id')||'';
+const WS_BASE_URL=IS_LOCAL?`${location.protocol==='https:'?'wss':'ws'}://${location.host}/ws`:'wss://62-109-16-64.sslip.io/ws';
+const WS_URL=VK_LAUNCH_USER_ID?`${WS_BASE_URL}?vk_user_id=${encodeURIComponent(VK_LAUNCH_USER_ID)}`:WS_BASE_URL;
 const menuScreen=$('menu-screen'),gameScreen=$('game-screen'),categoryPopup=$('category-popup'),namePopup=$('name-popup'),nameInput=$('name-input'),scoreboard=$('scoreboard'),chatBox=$('chat-box'),messages=$('messages'),input=$('message-input'),secretArea=$('secret-area'),secretWord=$('secret-word'),onAir=$('on-air'),onAirName=$('on-air-name'),categoryChip=$('category-chip'),categoryChipEmoji=$('category-chip-emoji'),categoryChipText=$('category-chip-text'),connectionDot=$('connection-dot'),connectionText=$('connection-text'),menuConnectionDot=$('menu-connection-dot'),menuConnectionText=$('menu-connection-text'),broadcastStatus=$('broadcast-status'),historyCount=$('history-count'),historyList=$('history-list'),topList=$('top-list'),mobileMenu=$('mobile-menu'),spectatorBanner=$('spectator-banner');
 let socket,myId=null,myEmoji=null,myAvatarUrl='',currentLeaderId=null,currentLeaderName='',currentCategory='',currentCategoryEmoji='🎲',latestPlayers=[],guessedWords=[],overlayTimer=null,reconnectTimer=null,heartbeatTimer=null,kickVoteTimer=null,isSpectator=false,isAdmin=false,pendingReply=null,winnerOverlayUntil=0;
 let vkProfile=null;
@@ -2779,7 +2781,7 @@ cacheVkProfile(profile);
 const vkName=[profile.first_name,profile.last_name].filter(Boolean).join(' ').trim().slice(0,30);
 const name=getSavedName()||vkName;
 const avatarUrl=profile.photo_200||profile.photo_100||'';
-if(name||avatarUrl)send({action:'set_profile',name,avatar_url:avatarUrl});
+if(name||avatarUrl)send({action:'set_profile',name,avatar_url:avatarUrl,vk_user_id:profile.id});
 }
 function setConnection(state,text){
 connectionDot.className=state==='green'?'online':state==='red'?'offline':'';
@@ -2957,6 +2959,7 @@ update();kickVoteTimer=setInterval(update,1000);
 function handleServer(data){
 if(data.type==='pong')return;
 if(data.type==='my_info'){myId=data.id;myEmoji=data.emoji;myAvatarUrl=data.avatar_url||'';setSpectator(data.spectator,true);updateRoleControls();addSystem(`Вы подключились · ID ${myId}`);if(data.name)nameInput.placeholder=data.name}
+else if(data.type==='profile_synced'){myId=data.id;myEmoji=data.emoji;myAvatarUrl=data.avatar_url||'';setSpectator(data.spectator,false);updateRoleControls();if(data.name)nameInput.placeholder=data.name}
 else if(data.type==='game_state'){currentLeaderId=data.leader_id;currentLeaderName=data.leader_name||'';updateCategory(data.category,data.category_emoji);setSpectator(data.spectator,true);updateOnAir();startGameUI()}
 else if(data.type==='chat'){addMessage(data.message,data.player_id===myId?'self':'other',data.emoji,data.name,data.message_id,data.proximity,data.reply_to,data.avatar_url,data.player_id);launchReaction(data.message)}
 else if(data.type==='system'){addSystem(data.message)}
@@ -3005,7 +3008,7 @@ $('menu-developers-btn').onclick=()=>$('developers-popup').style.display='flex';
 document.querySelectorAll('[data-modal-close]').forEach(btn=>btn.onclick=()=>$(btn.dataset.modalClose).style.display='none');
 $('mobile-more').onclick=e=>{e.stopPropagation();mobileMenu.classList.toggle('open')};document.addEventListener('click',e=>{if(!mobileMenu.contains(e.target)&&e.target!==$('mobile-more'))mobileMenu.classList.remove('open')});
 $('name-btn').onclick=()=>namePopup.style.display='flex';$('name-save-btn').onclick=()=>{const name=nameInput.value.trim();if(!name)return;savePlayerName(name);send({action:'set_name',name});namePopup.style.display='none';nameInput.value=''};
-$('name-vk-btn').onclick=async()=>{const profile=vkProfile||getCachedVkProfile()||await window.vkUserProfilePromise;if(!profile){showOverlay('VK НЕДОСТУПЕН','Откройте игру внутри VK','VK');return}vkProfile=profile;cacheVkProfile(profile);const name=[profile.first_name,profile.last_name].filter(Boolean).join(' ').trim().slice(0,30);const avatarUrl=profile.photo_200||profile.photo_100||'';if(!name){showOverlay('ИМЯ НЕ НАЙДЕНО','VK не передал имя профиля','VK');return}clearSavedName();send({action:'set_profile',name,avatar_url:avatarUrl});namePopup.style.display='none';nameInput.value='';showOverlay('ИМЯ ВОССТАНОВЛЕНО',name,'VK')};
+$('name-vk-btn').onclick=async()=>{const profile=vkProfile||getCachedVkProfile()||await window.vkUserProfilePromise;if(!profile){showOverlay('VK НЕДОСТУПЕН','Откройте игру внутри VK','VK');return}vkProfile=profile;cacheVkProfile(profile);const name=[profile.first_name,profile.last_name].filter(Boolean).join(' ').trim().slice(0,30);const avatarUrl=profile.photo_200||profile.photo_100||'';if(!name){showOverlay('ИМЯ НЕ НАЙДЕНО','VK не передал имя профиля','VK');return}clearSavedName();send({action:'set_profile',name,avatar_url:avatarUrl,vk_user_id:profile.id});namePopup.style.display='none';nameInput.value='';showOverlay('ИМЯ ВОССТАНОВЛЕНО',name,'VK')};
 $('history-btn').onclick=()=>{renderHistory();$('history-sheet').classList.add('open')};document.querySelectorAll('.sheet-close').forEach(btn=>btn.onclick=()=>$(btn.dataset.close).classList.remove('open'));
 $('reply-cancel').onclick=clearReply;
 $('emoji-btn').onclick=()=>$('emoji-row').classList.toggle('open');REACTION_EMOJIS.forEach(emoji=>{const el=document.createElement('span');el.className='emoji-item';el.textContent=emoji;el.onclick=()=>{send({action:'guess',word:emoji,reply_to:pendingReply?.messageId||null});clearReply();$('emoji-row').classList.remove('open')};$('emoji-row').appendChild(el)});

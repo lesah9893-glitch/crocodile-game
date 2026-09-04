@@ -131,6 +131,7 @@ class GameRoom:
         self.kick_vote_token = 0
         self.combo = 0
         self.spectator_mode_enabled = False
+        self.profile_cache = {}
 
     async def broadcast(self, data):
         sockets = list(self.players)
@@ -156,6 +157,7 @@ class GameRoom:
         if self.players:
             return
         self.reset_state()
+        self.profile_cache.clear()
 
     def reset_state(self):
         self.cancel_kick_vote_timer()
@@ -177,14 +179,36 @@ class GameRoom:
             task.cancel()
 
     def get_player_list(self):
-        return [{
-            "id": p["id"],
-            "emoji": p["emoji"],
-            "score": p["score"],
-            "name": p["name"],
-            "avatar_url": p.get("avatar_url", ""),
-            "spectator": p.get("spectator", False),
-        } for p in self.players.values()]
+        result = []
+        seen = set()
+        for p in self.players.values():
+            if p["id"] in seen:
+                continue
+            seen.add(p["id"])
+            result.append({
+                "id": p["id"],
+                "emoji": p["emoji"],
+                "score": p["score"],
+                "name": p["name"],
+                "avatar_url": p.get("avatar_url", ""),
+                "spectator": p.get("spectator", False),
+            })
+        return result
+
+    def get_player_by_vk_id(self, vk_user_id):
+        try:
+            vk_user_id = int(vk_user_id)
+        except (TypeError, ValueError):
+            return None
+        if vk_user_id <= 0:
+            return None
+        for player in self.players.values():
+            if player.get("vk_user_id") == vk_user_id:
+                return player
+        return self.profile_cache.get(vk_user_id)
+
+    def get_player_sockets(self, player_id):
+        return [ws for ws, player in self.players.items() if player["id"] == player_id]
 
     def get_player_by_id(self, player_id):
         try:
@@ -300,9 +324,12 @@ class GameRoom:
         })
 
     async def send_word_to_leader(self):
-        ws, _ = self.get_player_by_id(self.leader_id)
-        if ws and self.current_word:
-            await self.send_to(ws, {"type":"your_word","word":self.current_word})
+        if not self.current_word:
+            return
+        await asyncio.gather(*(
+            self.send_to(ws, {"type":"your_word","word":self.current_word})
+            for ws in self.get_player_sockets(self.leader_id)
+        ))
 
     async def promote_spectators(self):
         promoted = []
@@ -459,12 +486,20 @@ class GameRoom:
         if not ws or not target:
             return False
         was_leader = self.leader_id == target["id"]
-        await self.send_to(ws, {"type":"kicked","reason":reason or "Вы были удалены из игры."})
-        try:
-            await ws.close(code=4001)
-        except Exception:
-            pass
-        self.players.pop(ws, None)
+        target_sockets = self.get_player_sockets(target["id"])
+        await asyncio.gather(*(
+            self.send_to(target_ws, {"type":"kicked","reason":reason or "Вы были удалены из игры."})
+            for target_ws in target_sockets
+        ))
+        for target_ws in target_sockets:
+            try:
+                await target_ws.close(code=4001)
+            except Exception:
+                pass
+            self.players.pop(target_ws, None)
+        vk_user_id = target.get("vk_user_id")
+        if vk_user_id:
+            self.profile_cache.pop(vk_user_id, None)
         if self.kick_vote and self.kick_vote.get("target_id") == target["id"]:
             await self.close_kick_vote("Игрок удалён по итогам голосования.")
         if was_leader:
@@ -485,6 +520,18 @@ room = GameRoom()
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
+    raw_vk_user_id = websocket.query_params.get("vk_user_id")
+    try:
+        vk_user_id = int(raw_vk_user_id) if raw_vk_user_id else None
+        if vk_user_id is not None and vk_user_id <= 0:
+            vk_user_id = None
+    except (TypeError, ValueError):
+        vk_user_id = None
+    restored_player = room.get_player_by_vk_id(vk_user_id) if vk_user_id else None
+    already_connected = bool(
+        restored_player
+        and any(player is restored_player for player in room.players.values())
+    )
     existing_ids = {p["id"] for p in room.players.values()}
     player_id = random.randint(1000,9999)
     while player_id in existing_ids:
@@ -497,7 +544,7 @@ async def websocket_endpoint(websocket: WebSocket):
         and room.leader_id
         and room.current_word
     )
-    room.players[websocket] = {
+    new_player = {
         "id":player_id,
         "emoji":player_emoji,
         "score":0,
@@ -505,14 +552,19 @@ async def websocket_endpoint(websocket: WebSocket):
         "avatar_url":"",
         "spectator":spectator,
         "is_admin":False,
+        "vk_user_id":vk_user_id,
     }
+    player = restored_player or new_player
+    room.players[websocket] = player
+    if vk_user_id:
+        room.profile_cache[vk_user_id] = player
     await websocket.send_json({
         "type":"my_info",
-        "id":player_id,
-        "emoji":player_emoji,
-        "name":default_name,
-        "avatar_url":"",
-        "spectator":spectator,
+        "id":player["id"],
+        "emoji":player["emoji"],
+        "name":player["name"],
+        "avatar_url":player.get("avatar_url", ""),
+        "spectator":player.get("spectator", False),
     })
     if room.is_active and room.leader_id:
         _, leader = room.get_player_by_id(room.leader_id)
@@ -524,9 +576,10 @@ async def websocket_endpoint(websocket: WebSocket):
             "leader_avatar_url":leader.get("avatar_url", "") if leader else "",
             "category":room.category,
             "category_emoji":CATEGORY_EMOJIS.get(room.category,"🎲"),
-            "spectator":spectator,
+            "spectator":player.get("spectator", False),
         })
-    await room.broadcast({"type":"system","message":f"Игрок {default_name} присоединился к игре!"})
+    if not already_connected:
+        await room.broadcast({"type":"system","message":f"Игрок {player['name']} присоединился к игре!"})
     await room.broadcast({"type":"player_list","players":room.get_player_list()})
 
     try:
@@ -567,10 +620,35 @@ async def websocket_endpoint(websocket: WebSocket):
             if action == "set_profile":
                 profile_name = text_value(data, "name", 30)
                 avatar_url = safe_avatar_url(data.get("avatar_url"))
+                try:
+                    profile_vk_user_id = int(data.get("vk_user_id"))
+                    if profile_vk_user_id <= 0:
+                        profile_vk_user_id = None
+                except (TypeError, ValueError):
+                    profile_vk_user_id = None
+                if profile_vk_user_id:
+                    existing_player = room.get_player_by_vk_id(profile_vk_user_id)
+                    if existing_player and existing_player is not player:
+                        existing_player["is_admin"] = bool(
+                            existing_player.get("is_admin") or player.get("is_admin")
+                        )
+                        room.players[websocket] = existing_player
+                        player = existing_player
+                        player_id = player["id"]
+                    player["vk_user_id"] = profile_vk_user_id
+                    room.profile_cache[profile_vk_user_id] = player
                 if profile_name:
                     player["name"] = profile_name
                 if avatar_url:
                     player["avatar_url"] = avatar_url
+                await websocket.send_json({
+                    "type":"profile_synced",
+                    "id":player["id"],
+                    "emoji":player["emoji"],
+                    "name":player["name"],
+                    "avatar_url":player.get("avatar_url", ""),
+                    "spectator":player.get("spectator", False),
+                })
                 await room.broadcast({"type":"player_list","players":room.get_player_list()})
                 if room.leader_id == player_id:
                     await room.announce_leader(player_id)
@@ -586,6 +664,9 @@ async def websocket_endpoint(websocket: WebSocket):
                     continue
                 room.reset_state()
                 for p in room.players.values():
+                    p["score"] = 0
+                    p["spectator"] = False
+                for p in room.profile_cache.values():
                     p["score"] = 0
                     p["spectator"] = False
                 await room.broadcast({"type":"game_reset"})
@@ -876,7 +957,11 @@ async def websocket_endpoint(websocket: WebSocket):
         pass
     finally:
         leaving_player = room.players.pop(websocket,None)
-        if leaving_player:
+        player_still_connected = bool(
+            leaving_player
+            and any(player is leaving_player for player in room.players.values())
+        )
+        if leaving_player and not player_still_connected:
             if room.kick_vote:
                 room.kick_vote["yes"].discard(leaving_player["id"])
                 room.kick_vote["no"].discard(leaving_player["id"])
